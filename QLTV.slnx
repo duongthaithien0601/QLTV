@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="QLTV.vcxproj" Id="4d7ea306-7d37-4760-b646-8258adf0c7d9" />
+</Solution>
