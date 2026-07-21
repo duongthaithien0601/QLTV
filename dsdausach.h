@@ -10,15 +10,6 @@
 inline bool KiemTraDanhSachDauSachDay(const DanhSachDauSach& DuLieuSach) {
     return DuLieuSach.SoLuong >= MaxDauSach;
 }
-// Tìm con trỏ Đầu Sách dựa trên mã ISBN (Trả về NULL nếu không thấy)
-inline DauSach* TimDauSachTheoISBN(const DanhSachDauSach& DuLieuSach, const std::string& ISBNCanXuLy) {
-    for (int i = 0; i < DuLieuSach.SoLuong; ++i) {
-        if (DuLieuSach.Nodes[i]->ISBN == ISBNCanXuLy) {
-            return DuLieuSach.Nodes[i];
-        }
-    }
-    return NULL;
-}
 // Kiểm tra xem ISBN đã tồn tại trong danh sách chưa (trả về true/false)
 inline bool KiemTraISBNTonTai(const DanhSachDauSach& DuLieuSach, const std::string& ISBNCanXuLy) {
     return TimDauSachTheoISBN(DuLieuSach, ISBNCanXuLy) != NULL;

@@ -25,16 +25,6 @@ inline DocGiaNode* TimDocGiaTheoMaThe(DocGiaNode* Root, int MaTheCanXuLy) {
 inline bool KiemTraMaTheTonTai(DocGiaNode* Root, int MaTheCanXuLy) {
     return TimDocGiaTheoMaThe(Root, MaTheCanXuLy) != NULL;
 }
-// Tìm node có giá trị nhỏ nhất trong cây con (Dùng khi xóa node có 2 con)
-inline DocGiaNode* TimNodeNhoNhat(DocGiaNode* Root) {
-    if (Root == NULL) {
-        return NULL;
-    }
-    while (Root->Left != NULL) {
-        Root = Root->Left;
-    }
-    return Root;
-}
 
 // =================== THAY ĐỔI CẤU TRÚC CÂY (THÊM / XÓA NODE) =====================
 // Chèn một độc giả mới vào cây (BST Insertion)

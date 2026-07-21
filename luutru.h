@@ -76,72 +76,7 @@ template <typename T> inline std::string ChuyenThanhChuoi(T GiaTriCanThem) {
     return Oss.str();
 }
 
-// ========================= TIỆN ÍCH XỬ LÝ NGÀY THÁNG =========================
-// Kiểm tra tính hợp lệ của ngày tháng
-inline std::string ChuyenNgayThanhChuoi(const NgayThangNam& NgayCanXuLy) {
-    if (!KiemTraNgayHopLe(NgayCanXuLy)) {
-        return std::string("0/0/0");
-    }
-    std::ostringstream Oss;
-    if (NgayCanXuLy.Ngay < 10) {
-        Oss << '0';
-    }
-    Oss << NgayCanXuLy.Ngay << '/';
-    if (NgayCanXuLy.Thang < 10) {
-        Oss << '0';
-    }
-    Oss << NgayCanXuLy.Thang << '/';
-    Oss << NgayCanXuLy.Nam;
-    return Oss.str();
-}
-// Phân tích chuỗi thành ngày tháng
-inline bool PhanTichChuoiNgay(const std::string& ChuoiNhap, NgayThangNam& KetQuaDauRa) {
-    if (ChuoiNhap.empty()) {
-        KetQuaDauRa = NgayThangNam{ 0, 0, 0 };
-        return true;
-    }
-    int GiaTriThuNhat = 0, GiaTriThuHai = 0, KyTuDoc = 0;
-    char Sep1 = 0, Sep2 = 0;
-    std::istringstream Iss(ChuoiNhap);
-    if ((Iss >> GiaTriThuNhat >> Sep1 >> GiaTriThuHai >> Sep2 >> KyTuDoc)) {
-        if (Sep1 == '/' && Sep2 == '/') {
-            KetQuaDauRa.Ngay = GiaTriThuNhat;
-            KetQuaDauRa.Thang = GiaTriThuHai;
-            KetQuaDauRa.Nam = KyTuDoc;
-            return KiemTraNgayHopLe(KetQuaDauRa);
-        }
-        if (Sep1 == '-' && Sep2 == '-') {
-            KetQuaDauRa.Nam = GiaTriThuNhat;
-            KetQuaDauRa.Thang = GiaTriThuHai;
-            KetQuaDauRa.Ngay = KyTuDoc;
-            return KiemTraNgayHopLe(KetQuaDauRa);
-        }
-    }
-    if (ChuoiNhap.size() == 8) {
-        KetQuaDauRa.Ngay = std::atoi(ChuoiNhap.substr(0, 2).c_str());
-        KetQuaDauRa.Thang = std::atoi(ChuoiNhap.substr(2, 2).c_str());
-        KetQuaDauRa.Nam = std::atoi(ChuoiNhap.substr(4, 4).c_str());
-        return KiemTraNgayHopLe(KetQuaDauRa);
-    }
-    return false;
-}
-
 //========================= GIẢI PHÓNG BỘ NHỚ =========================
-// ----------------- Danh mục sách -----------------
-inline void GiaiPhongDanhMucSachLuuTru(DanhMucSachNode*& Head) {
-    GiaiPhongDanhMucSach(Head);
-}
-// ----------------- Đầu sách -----------------
-inline void GiaiPhongVectorDauSach(std::vector<DauSach*>& DanhSachDauSach) {
-    for (size_t i = 0; i < DanhSachDauSach.size(); i++) {
-        DauSach* DuLieuSach = DanhSachDauSach[i];
-        if (DuLieuSach != NULL) {
-            GiaiPhongDanhMucSachLuuTru(DuLieuSach->DanhMucSachHead);
-            delete DuLieuSach;
-        }
-    }
-    DanhSachDauSach.clear();
-}
 // ----------------- Độc giả (BST) -----------------
 // Giải phóng toàn bộ cây BST độc giả
 inline void GiaiPhongCayDocGia(DocGiaNode*& Root) {
@@ -430,12 +365,12 @@ inline bool DocMuonTra(
         NgayThangNam NgayMuon{ 0, 0, 0 };
         NgayThangNam NgayTra{ 0, 0, 0 };
         // Ngày mượn phải hợp lệ và không được ở tương lai
-        if (!PhanTichChuoiNgay(CacCot[2],NgayMuon) || SoSanhNgay(NgayMuon,NgayHienTai) > 0){
+        if (!PhanTichNgayDDMMYYYY(CacCot[2], NgayMuon) || SoSanhNgay(NgayMuon, NgayHienTai) > 0){
             continue;
         }
         // Phiếu đã trả phải có ngày trả hợp lệ
         if (TrangThaiTam == 1){
-            if (!PhanTichChuoiNgay(CacCot[3],NgayTra) || SoSanhNgay(NgayTra,NgayMuon) < 0 || SoSanhNgay(NgayTra,NgayHienTai) > 0){
+            if (!PhanTichNgayDDMMYYYY(CacCot[3], NgayTra) || SoSanhNgay(NgayTra, NgayMuon) < 0 || SoSanhNgay(NgayTra, NgayHienTai) > 0){
                 continue;
             }
         }

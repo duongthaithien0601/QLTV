@@ -74,19 +74,6 @@ inline void ThongKeTop10TheoLuotMuon(const DanhSachDauSach& DanhSachDauSach,DauS
 }
 
 // =================== THỐNG KÊ ĐỘC GIẢ QUÁ HẠN ===================
-// Hàm phụ: Tìm đầu sách trong mảng tĩnh (const)
-inline const DauSach* TimDauSachChoThongKe(const DanhSachDauSach& DanhSachDauSach, const std::string& ISBNCanXuLy) {
-    // Vòng lặp duyệt từ đầu (0) đến cuối danh sách (n)
-    for (int i = 0; i < DanhSachDauSach.SoLuong; i++) {
-        // So sánh ISBN của sách tại vị trí i với ISBN cần tìm
-        if (DanhSachDauSach.Nodes[i]->ISBN == ISBNCanXuLy) {
-            // Nếu trùng khớp -> Trả về con trỏ sách tại vị trí đó ngay lập tức
-            return DanhSachDauSach.Nodes[i];
-        }
-    }
-    // Nếu chạy hết vòng lặp mà không return (tức là không tìm thấy)
-    return NULL;
-}
 // Hàm phụ: Duyệt cây (DFS) để thu thập dữ liệu vào mảng outRows
 inline void DuyetCayThongKeQuaHan(DocGiaNode* Root,
     const DanhSachDauSach& DanhSachDauSach,
@@ -115,7 +102,7 @@ inline void DuyetCayThongKeQuaHan(DocGiaNode* Root,
                 return;
             } // Đầy mảng thì dừng
             std::string ISBNCanXuLy = LayISBNTuMaSach(ConTroHienTai->MaSach);
-            const DauSach* DuLieuSach = TimDauSachChoThongKe(DanhSachDauSach, ISBNCanXuLy);
+            const DauSach* DuLieuSach = TimDauSachTheoISBN(DanhSachDauSach,ISBNCanXuLy);
             // Điền dữ liệu vào mảng tại vị trí count
             DanhSachQuaHan[SoLuongTimThay].MaThe = DocGiaCanXuLy->MaThe;
             SaoChepChuoi(DanhSachQuaHan[SoLuongTimThay].HoTen,

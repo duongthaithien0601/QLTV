@@ -148,6 +148,18 @@ struct ThongKeQuaHan {
     }
 };
 
+// ======================= HÀM DÙNG CHUNG =======================
+// Tìm đầu sách theo ISBN.
+inline DauSach* TimDauSachTheoISBN(const DanhSachDauSach& DuLieuSach,const std::string& ISBNCanXuLy){
+    for (int i = 0; i < DuLieuSach.SoLuong; i++) {
+        if (DuLieuSach.Nodes[i] != NULL && DuLieuSach.Nodes[i]->ISBN == ISBNCanXuLy){
+            return DuLieuSach.Nodes[i];
+        }
+    }
+
+    return NULL;
+}
+
 // ======================= HÀM TIỆN ÍCH =======================
 // Sao chep std::string vao mang char an toan.
 inline void SaoChepChuoi(char ChuoiDich[], int KichThuoc, const std::string& ChuoiNguon) {
@@ -252,6 +264,23 @@ inline NgayThangNam PhanTichNgayDDMMYYYY(const std::string& ChuoiNhap) {
     (void)PhanTichNgayDDMMYYYY(ChuoiNhap, NgayCanXuLy);
     return NgayCanXuLy;
 }
+// Chuyển ngày tháng thành chuỗi định dạng dd/mm/yyyy.
+inline std::string ChuyenNgayThanhChuoi(const NgayThangNam& NgayCanXuLy){
+    if (!KiemTraNgayHopLe(NgayCanXuLy)){
+        return "0/0/0";
+    }
+    char BoDem[16];
+    std::snprintf(
+        BoDem,
+        sizeof(BoDem),
+        "%02d/%02d/%04d",
+        NgayCanXuLy.Ngay,
+        NgayCanXuLy.Thang,
+        NgayCanXuLy.Nam
+    );
+
+    return std::string(BoDem);
+}
 // Lấy ngày hiện tại
 inline int ChuyenNgayThanhSoThuTu(const NgayThangNam& GiaTriThuNhat) {
     int Y = GiaTriThuNhat.Nam;
@@ -263,16 +292,13 @@ inline int ChuyenNgayThanhSoThuTu(const NgayThangNam& GiaTriThuNhat) {
     }
     return 365 * Y + Y / 4 - Y / 100 + Y / 400 + (153 * M - 457) / 5 + NgayCanXuLy - 306;
 }
-// Tính số ngày giữa 2 ngày
-inline int TinhKhoangCachNgay(const NgayThangNam& GiaTriThuNhat, const NgayThangNam& GiaTriThuHai) {
-    if (!KiemTraNgayHopLe(GiaTriThuNhat) || !KiemTraNgayHopLe(GiaTriThuHai)) {
+// Tính số ngày chênh lệch: NgaySau - NgayTruoc.
+inline int TinhSoNgayChenhLech(const NgayThangNam& NgaySau,const NgayThangNam& NgayTruoc){
+    if (!KiemTraNgayHopLe(NgaySau) || !KiemTraNgayHopLe(NgayTruoc)){
         return 0;
     }
-    return ChuyenNgayThanhSoThuTu(GiaTriThuHai) - ChuyenNgayThanhSoThuTu(GiaTriThuNhat);
-}
-// Tính số ngày từ a đến b (b - a)
-inline int TinhSoNgayChenhLech(const NgayThangNam& GiaTriThuHai, const NgayThangNam& GiaTriThuNhat) {
-    return TinhKhoangCachNgay(GiaTriThuNhat, GiaTriThuHai);
+
+    return ChuyenNgayThanhSoThuTu(NgaySau) - ChuyenNgayThanhSoThuTu(NgayTruoc);
 }
 // Lấy ngày hiện tại của hệ thống
 inline NgayThangNam LayNgayHienTai(){

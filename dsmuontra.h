@@ -26,16 +26,6 @@ inline void ThemPhieuMuonChoDocGia(DocGia& DocGiaCanXuLy, const std::string& MaS
     NodeCanXuLy->Next = DocGiaCanXuLy.MuonTraHead;
     DocGiaCanXuLy.MuonTraHead = NodeCanXuLy;
 }
-// Trích xuất danh sách các sách ĐANG MƯỢN ra mảng (để hiển thị lên bảng)
-inline void LayDanhSachDangMuon(DocGia& DocGiaCanXuLy, MuonTraNode* DanhSachKetQua[], int& SoLuongKetQua) {
-    SoLuongKetQua = 0;
-    for (MuonTraNode* ConTroHienTai = DocGiaCanXuLy.MuonTraHead; ConTroHienTai != NULL;
-        ConTroHienTai = ConTroHienTai->Next) {
-        if (ConTroHienTai->TrangThai == 0) {
-            DanhSachKetQua[SoLuongKetQua++] = ConTroHienTai;
-        }
-    }
-}
 
 // ========== KIỂM TRA TÌNH TRẠNG SÁCH TRÊN TOÀN HỆ THỐNG ====================
 // Kiểm tra xem một đầu sách (ISBN) có đang được độc giả nào mượn không
