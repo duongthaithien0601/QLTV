@@ -221,17 +221,16 @@ inline void HoanDoiDauSach(DauSach*& GiaTriThuNhat, DauSach*& GiaTriThuHai) {
     GiaTriThuHai = Temp;
 }
 // --- 1. Sắp xếp theo TÊN SÁCH (A -> Z) ---
-inline int PhanHoachTheoTenSach(DauSach* MangDuLieu[], int ChiSoTrai, int ChiSoPhai) {
-    std::string GiaTriChot = ChuyenThanhChuHoa(CatKhoangTrangHaiDau(MangDuLieu[ChiSoPhai]->TenSach));
+inline int PhanHoachTheoTenSach(DauSach* MangDuLieu[],int ChiSoTrai,int ChiSoPhai){
+    std::string GiaTriChot = TaoKhoaTenSach(MangDuLieu[ChiSoPhai]);
     int i = ChiSoTrai - 1;
-    for (int j = ChiSoTrai; j < ChiSoPhai; j++) {
-        // So sánh chuỗi
-        if (ChuyenThanhChuHoa(CatKhoangTrangHaiDau(MangDuLieu[j]->TenSach)) < GiaTriChot) {
+    for (int j = ChiSoTrai;j < ChiSoPhai;j++){
+        if (TaoKhoaTenSach(MangDuLieu[j]) < GiaTriChot){
             i++;
-            HoanDoiDauSach(MangDuLieu[i], MangDuLieu[j]);
+            HoanDoiDauSach(MangDuLieu[i],MangDuLieu[j]);
         }
     }
-    HoanDoiDauSach(MangDuLieu[i + 1], MangDuLieu[ChiSoPhai]);
+    HoanDoiDauSach(MangDuLieu[i + 1],MangDuLieu[ChiSoPhai]);
     return i + 1;
 }
 // Hàm chính Quick Sort theo TÊN SÁCH

@@ -94,8 +94,7 @@ inline void DuyetCayThongKeQuaHan(DocGiaNode* Root,
         if (ConTroHienTai->TrangThai != 0) {
             continue;
         }
-        int TongSoNgay = TinhSoNgayChenhLech(NgayHienTai, ConTroHienTai->NgayMuon);
-        int Tre = TongSoNgay - HanMuonNgay;
+        int Tre = TinhSoNgayTre(ConTroHienTai->NgayMuon,NgayHienTai);
         // Nếu quá hạn
         if (Tre > 0) {
             if (SoLuongTimThay >= SoDongToiDa) {

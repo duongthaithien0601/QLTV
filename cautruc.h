@@ -300,6 +300,14 @@ inline int TinhSoNgayChenhLech(const NgayThangNam& NgaySau,const NgayThangNam& N
 
     return ChuyenNgayThanhSoThuTu(NgaySau) - ChuyenNgayThanhSoThuTu(NgayTruoc);
 }
+// Tính số ngày trễ của một phiếu mượn.
+inline int TinhSoNgayTre(const NgayThangNam& NgayMuon,const NgayThangNam& NgayKiemTra){
+    int TongSoNgay = TinhSoNgayChenhLech(NgayKiemTra, NgayMuon);
+    if (TongSoNgay <= HanMuonNgay) {
+        return 0;
+    }
+    return TongSoNgay - HanMuonNgay;
+}
 // Lấy ngày hiện tại của hệ thống
 inline NgayThangNam LayNgayHienTai(){
     std::time_t ThoiGianHienTai = std::time(NULL);

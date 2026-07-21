@@ -15,14 +15,19 @@ inline std::string LayTenSachTheoISBN(const DanhSachDauSach& DanhSachDauSach, co
     }
     return ConTroHienTai->TenSach;
 }
-// Tạo node mượn trả mới và gắn vào đầu danh sách liên kết của độc giả (Lưu ý: Hành động này chưa kiểm tra điều kiện
-// mượn, chỉ đơn thuần là thêm dữ liệu)
-inline void ThemPhieuMuonChoDocGia(DocGia& DocGiaCanXuLy, const std::string& MaSach, const NgayThangNam& NgayMuon) {
+// Tạo node mượn trả mới và gắn vào đầu danh sách liên kết của độc giả (Lưu ý: Hành động này chưa kiểm tra điều kiện mượn, chỉ đơn thuần là thêm dữ liệu)
+inline void ThemPhieuMuonTraChoDocGia(
+    DocGia& DocGiaCanXuLy,
+    const std::string& MaSach,
+    const NgayThangNam& NgayMuon,
+    const NgayThangNam& NgayTra,
+    int TrangThai
+) {
     MuonTraNode* NodeCanXuLy = new MuonTraNode();
-    SaoChepChuoi(NodeCanXuLy->MaSach, MaxMaSach, MaSach);
-    NodeCanXuLy->TrangThai = 0;
+    SaoChepChuoi(NodeCanXuLy->MaSach,MaxMaSach,MaSach);
     NodeCanXuLy->NgayMuon = NgayMuon;
-    // Thêm vào đầu danh sách (LIFO)
+    NodeCanXuLy->NgayTra = NgayTra;
+    NodeCanXuLy->TrangThai = TrangThai;
     NodeCanXuLy->Next = DocGiaCanXuLy.MuonTraHead;
     DocGiaCanXuLy.MuonTraHead = NodeCanXuLy;
 }
@@ -61,8 +66,7 @@ inline bool KiemTraDocGiaQuaHanDenNgay(const DocGia& DocGiaCanXuLy,
     for (MuonTraNode* ConTroHienTai = DocGiaCanXuLy.MuonTraHead; ConTroHienTai != NULL;
         ConTroHienTai = ConTroHienTai->Next) {
         if (ConTroHienTai->TrangThai == 0) {
-            int TongSoNgay = TinhSoNgayChenhLech(NgayHienTai, ConTroHienTai->NgayMuon);
-            int Tre = std::max(0, TongSoNgay - HanMuonNgay);
+            int Tre = TinhSoNgayTre(ConTroHienTai->NgayMuon,NgayHienTai);
             if (Tre > 0) {
                 CoSachQuaHan = true;
                 if (Tre > SoNgayTreLonNhat) {
@@ -135,12 +139,15 @@ inline bool MuonSach(
         }
         return false;
     }
-    ThemPhieuMuonChoDocGia(DocGiaCanXuLy,BanSaoCoTheMuon->MaSach,NgayMuon);
-    DuLieuSach.SoLuotMuon++;
-    if (MaSachDaMuon != NULL){
-        *MaSachDaMuon = BanSaoCoTheMuon->MaSach;
-    }
-    return true;
+    NgayThangNam NgayTra{0,0,0
+    };
+    ThemPhieuMuonTraChoDocGia(
+        DocGiaCanXuLy,
+        BanSaoCoTheMuon->MaSach,
+        NgayMuon,
+        NgayTra,
+        0
+    );
 }
 // Xử lý TRẢ SÁCH
 inline bool TraSach(
@@ -207,7 +214,7 @@ inline bool TraSach(
     DoiTuongCanXuLy->TrangThai = 1;
     DoiTuongCanXuLy->NgayTra = NgayTra;
     int TongSoNgay = TinhSoNgayChenhLech(NgayTra,DoiTuongCanXuLy->NgayMuon);
-    int SoNgayTre = std::max(0,TongSoNgay - HanMuonNgay);
+    int SoNgayTre = TinhSoNgayTre(DoiTuongCanXuLy->NgayMuon,NgayTra);
     if (TongSoNgayKetQua != NULL){
         *TongSoNgayKetQua = TongSoNgay;
     }

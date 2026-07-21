@@ -1,13 +1,12 @@
 #pragma once
 #include <fstream>
-#include <sstream>
 #include <string>
-#include <vector>
 #include <cstdio>
 #include "cautruc.h"
 #include "dsdms.h"
 #include "dsdausach.h"
 #include "dsdocgia.h"
+#include "dsmuontra.h"
 #ifdef _WIN32
 #include <direct.h>
 #else
@@ -42,38 +41,33 @@ inline bool DamBaoThuMucDuLieu() {
 }
 
 //========================= TIỆN ÍCH XỬ LÝ CHUỖI =========================
-// Tách chuỗi theo ký tự '|'
-inline std::vector<std::string> TachChuoiTheoDauGach(const std::string& DongDuLieu) {
-    std::vector<std::string> KetQuaDauRa;
-    std::string ChiSoHienTai;
-    for (size_t i = 0; i < DongDuLieu.size(); i++) {
+// Tách một dòng thành các cột theo ký tự '|'.
+inline int TachChuoiTheoDauGach(const std::string& DongDuLieu,std::string CacCot[],int SoCotToiDa){
+    if (CacCot == NULL || SoCotToiDa <= 0){
+        return 0;
+    }
+    int SoLuongCot = 0;
+    std::string CotHienTai = "";
+    for (size_t i = 0;i < DongDuLieu.size();i++){
         char KyTuDoc = DongDuLieu[i];
-        if (KyTuDoc == '|') {
-            KetQuaDauRa.push_back(ChiSoHienTai);
-            ChiSoHienTai.clear();
+        if (KyTuDoc == '|'){
+            if (SoLuongCot >= SoCotToiDa){
+                return SoCotToiDa + 1;
+            }
+            CacCot[SoLuongCot] = CotHienTai;
+            SoLuongCot++;
+            CotHienTai = "";
         }
         else {
-            ChiSoHienTai.push_back(KyTuDoc);
+            CotHienTai += KyTuDoc;
         }
     }
-    KetQuaDauRa.push_back(ChiSoHienTai);
-    return KetQuaDauRa;
-}
-// Nối chuỗi với ký tự '|'
-inline std::string NoiChuoiBangDauGach(const std::vector<std::string>& GiaTriCanThem) {
-    std::ostringstream Oss;
-    for (size_t i = 0; i < GiaTriCanThem.size(); i++) {
-        if (i > 0) {
-            Oss << '|';
-        }
-        Oss << GiaTriCanThem[i];
+    if (SoLuongCot >= SoCotToiDa) {
+        return SoCotToiDa + 1;
     }
-    return Oss.str();
-}
-template <typename T> inline std::string ChuyenThanhChuoi(T GiaTriCanThem) {
-    std::ostringstream Oss;
-    Oss << GiaTriCanThem;
-    return Oss.str();
+    CacCot[SoLuongCot] = CotHienTai;
+    SoLuongCot++;
+    return SoLuongCot;
 }
 
 //========================= GIẢI PHÓNG BỘ NHỚ =========================
@@ -124,24 +118,8 @@ inline bool DocDauSach(DanhSachDauSach& DanhSachDauSach) {
             continue;
         }
         std::string CacCot[8];
-        int ChiSoCot = 0;
-        std::string ChiSoHienTai = "";
-        for (char KyTuDoc : DongDuLieu) {
-            if (KyTuDoc == '|') {
-                if (ChiSoCot < 8) {
-                    CacCot[ChiSoCot++] = ChiSoHienTai;
-                }
-                ChiSoHienTai = "";
-            }
-            else {
-                ChiSoHienTai += KyTuDoc;
-            }
-        }
-        if (ChiSoCot < 8) {
-            CacCot[ChiSoCot++] = ChiSoHienTai;
-        }
-
-        if (ChiSoCot < 8) {
+        int SoLuongCot = TachChuoiTheoDauGach(DongDuLieu,CacCot,8);
+        if (SoLuongCot != 8) {
             continue;
         }
         DauSach* DuLieuSach = new DauSach();
@@ -191,18 +169,15 @@ inline bool DocDanhMucSach(DanhSachDauSach& DanhSachDauSach) {
     while (std::getline(Fi, DongDuLieu)) {
         if (DongDuLieu.empty()) {
             continue;
-        }
-        size_t ViTriDauThuNhat = DongDuLieu.find('|');
-        if (ViTriDauThuNhat == std::string::npos) {
+        }           
+        std::string CacCot[3];
+        int SoLuongCot = TachChuoiTheoDauGach(DongDuLieu,CacCot,3);
+        if (SoLuongCot != 3) {
             continue;
         }
-        size_t ViTriDauThuHai = DongDuLieu.find('|', ViTriDauThuNhat + 1);
-        if (ViTriDauThuHai == std::string::npos) {
-            continue;
-        }
-        std::string ISBNCanXuLy = DongDuLieu.substr(0, ViTriDauThuNhat);
-        std::string MaSach = DongDuLieu.substr(ViTriDauThuNhat + 1,ViTriDauThuHai - ViTriDauThuNhat - 1);
-        std::string ChuoiTrangThai = DongDuLieu.substr(ViTriDauThuHai + 1);
+        std::string ISBNCanXuLy = CacCot[0];
+        std::string MaSach = CacCot[1];
+        std::string ChuoiTrangThai = CacCot[2];
         DauSach* DuLieuSach = TimDauSachTheoISBN(DanhSachDauSach,ISBNCanXuLy);
         if (DuLieuSach == NULL) {
             continue;
@@ -215,10 +190,7 @@ inline bool DocDanhMucSach(DanhSachDauSach& DanhSachDauSach) {
         int TrangThaiTam = std::atoi(ChuoiTrangThai.c_str());
         NodeCanXuLy->TrangThai =(TrangThaiTam == 1 ? 1 : 0);
         // Thêm vào DSLK đơn
-        ThemSachVaoCuoiDanhMuc(
-            DuLieuSach,
-            NodeCanXuLy
-        );
+        ThemSachVaoCuoiDanhMuc(DuLieuSach,NodeCanXuLy);
     }
 
     return true;
@@ -226,22 +198,20 @@ inline bool DocDanhMucSach(DanhSachDauSach& DanhSachDauSach) {
 
 // ========================= LƯU / ĐỌC: ĐỘC GIẢ (BST) =========================
 // Lưu cây BST độc giả
-inline void LuuDocGiaTheoThuTu(std::ofstream& Fo, DocGiaNode* Root) {
+inline void LuuDocGiaTheoThuTu(std::ofstream& Fo,DocGiaNode* Root){
     if (Root == NULL) {
         return;
     }
-    LuuDocGiaTheoThuTu(Fo, Root->Left);
-    {
-        const DocGia& DocGiaCanXuLy = Root->ThongTin;
-        std::vector<std::string> CacCot;
-        CacCot.push_back(ChuyenThanhChuoi(DocGiaCanXuLy.MaThe));
-        CacCot.push_back(DocGiaCanXuLy.Ho);
-        CacCot.push_back(DocGiaCanXuLy.Ten);
-        CacCot.push_back(DocGiaCanXuLy.Phai);
-        CacCot.push_back(ChuyenThanhChuoi(DocGiaCanXuLy.TrangThaiThe));
-        Fo << NoiChuoiBangDauGach(CacCot) << "\n";
-    }
-    LuuDocGiaTheoThuTu(Fo, Root->Right);
+    LuuDocGiaTheoThuTu(Fo,Root->Left);
+    const DocGia& DocGiaCanXuLy = Root->ThongTin;
+    Fo
+        << DocGiaCanXuLy.MaThe << "|"
+        << DocGiaCanXuLy.Ho << "|"
+        << DocGiaCanXuLy.Ten << "|"
+        << DocGiaCanXuLy.Phai << "|"
+        << DocGiaCanXuLy.TrangThaiThe
+        << "\n";
+    LuuDocGiaTheoThuTu(Fo,Root->Right);
 }
 // Đọc cây BST độc giả
 inline bool LuuDocGia(DocGiaNode* Root) {
@@ -262,8 +232,9 @@ inline bool DocDocGia(DocGiaNode*& Root) {
     }
     std::string DongDuLieu;
     while (std::getline(Fi, DongDuLieu)) {
-        std::vector<std::string> CacCot = TachChuoiTheoDauGach(DongDuLieu);
-        if (CacCot.size() < 5) {
+        std::string CacCot[5];
+        int SoLuongCot = TachChuoiTheoDauGach(DongDuLieu,CacCot,5);
+        if (SoLuongCot != 5) {
             continue;
         }
         DocGia DocGiaCanXuLy;
@@ -290,26 +261,31 @@ inline bool DocDocGia(DocGiaNode*& Root) {
 
 // ========================= LƯU / ĐỌC: MƯỢN TRẢ SÁCH =========================
 // Lưu danh sách mượn trả sách
-inline void DuyetCayLuuMuonTra(std::ofstream& Fo, DocGiaNode* Root) {
+inline void DuyetCayLuuMuonTra(std::ofstream& Fo,DocGiaNode* Root){
     if (Root == NULL) {
         return;
     }
-    DuyetCayLuuMuonTra(Fo, Root->Left);
-    {
-        const DocGia& DocGiaCanXuLy = Root->ThongTin;
-        MuonTraNode* ConTroHienTai = DocGiaCanXuLy.MuonTraHead;
-        while (ConTroHienTai != NULL) {
-            std::vector<std::string> CacCot;
-            CacCot.push_back(ChuyenThanhChuoi(DocGiaCanXuLy.MaThe));
-            CacCot.push_back(ConTroHienTai->MaSach);
-            CacCot.push_back(ChuyenNgayThanhChuoi(ConTroHienTai->NgayMuon));
-            CacCot.push_back(ChuyenNgayThanhChuoi(ConTroHienTai->NgayTra));
-            CacCot.push_back(ChuyenThanhChuoi(static_cast<int>(ConTroHienTai->TrangThai)));
-            Fo << NoiChuoiBangDauGach(CacCot) << "\n";
-            ConTroHienTai = ConTroHienTai->Next;
-        }
+    DuyetCayLuuMuonTra(Fo,Root->Left);
+    const DocGia& DocGiaCanXuLy = Root->ThongTin;
+    MuonTraNode* ConTroHienTai = DocGiaCanXuLy.MuonTraHead;
+    while (ConTroHienTai != NULL) {
+        Fo
+            << DocGiaCanXuLy.MaThe << "|"
+            << ConTroHienTai->MaSach << "|"
+            << ChuyenNgayThanhChuoi(
+                ConTroHienTai->NgayMuon
+            )
+            << "|"
+            << ChuyenNgayThanhChuoi(
+                ConTroHienTai->NgayTra
+            )
+            << "|"
+            << ConTroHienTai->TrangThai
+            << "\n";
+        ConTroHienTai =
+            ConTroHienTai->Next;
     }
-    DuyetCayLuuMuonTra(Fo, Root->Right);
+    DuyetCayLuuMuonTra(Fo,Root->Right);
 }
 // Đọc danh sách mượn trả sách
 inline bool LuuMuonTra(DocGiaNode* Root) {
@@ -335,25 +311,8 @@ inline bool DocMuonTra(
             continue;
         }
         std::string CacCot[5];
-        int ChiSoCot = 0;
-        std::string ChiSoHienTai = "";
-        for (char KyTuDoc : DongDuLieu){
-            if (KyTuDoc == '|'){
-                if (ChiSoCot < 5){
-                    CacCot[ChiSoCot] = ChiSoHienTai;
-                    ChiSoCot++;
-                }
-                ChiSoHienTai = "";
-            }
-            else{
-                ChiSoHienTai += KyTuDoc;
-            }
-        }
-        if (ChiSoCot < 5){
-            CacCot[ChiSoCot] = ChiSoHienTai;
-            ChiSoCot++;
-        }
-        if (ChiSoCot < 5){
+        int SoLuongCot = TachChuoiTheoDauGach(DongDuLieu,CacCot,5);
+        if (SoLuongCot != 5) {
             continue;
         }
         int MaTheCanXuLy =  std::atoi(CacCot[0].c_str());
@@ -383,21 +342,18 @@ inline bool DocMuonTra(
         if (DuLieuSach != NULL){
             BanSaoSach = TimSachTheoMaSach(DuLieuSach,MaSach);
         }
-        // Chỉ phiếu đang mượn mới được thay đổi
-        // trạng thái bản sao thành đã mượn
-        if (TrangThaiTam == 0){
-            if (BanSaoSach == NULL || BanSaoSach->TrangThai != 0){
+        if (TrangThaiTam == 0) {
+            if (!DanhDauSachDaMuon(BanSaoSach)) {
                 continue;
             }
-            BanSaoSach->TrangThai = 1;
         }
-        MuonTraNode* NodeCanXuLy = new MuonTraNode();
-        SaoChepChuoi( NodeCanXuLy->MaSach,MaxMaSach,MaSach );
-        NodeCanXuLy->NgayMuon = NgayMuon;
-        NodeCanXuLy->NgayTra = NgayTra;
-        NodeCanXuLy->TrangThai = TrangThaiTam;
-        NodeCanXuLy->Next = DgNode->ThongTin.MuonTraHead;
-        DgNode->ThongTin.MuonTraHead = NodeCanXuLy;
+        ThemPhieuMuonTraChoDocGia(
+            DgNode->ThongTin,
+            MaSach,
+            NgayMuon,
+            NgayTra,
+            TrangThaiTam
+        );
     }
     return true;
 }
