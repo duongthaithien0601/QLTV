@@ -67,38 +67,64 @@ inline void ThemDocGiaVaoCay(DocGiaNode*& Root, const DocGia& GiaTriCanThem) {
         Parent->Right = new DocGiaNode(GiaTriCanThem);
     }
 }
+// Giải phóng toàn bộ danh sách mượn trả của một độc giả
+inline void GiaiPhongDanhSachMuonTra(MuonTraNode*& Head){
+    while (Head != NULL){
+        MuonTraNode* NodeCanXoa = Head;
+        Head = Head->Next;
+        delete NodeCanXoa;
+    }
+}
 // Hàm đệ quy xóa node theo Mã thẻ (BST Deletion)
-inline void XoaNodeDocGia(DocGiaNode*& Root, int MaTheCanXuLy) {
-    if (Root == NULL) {
+inline void XoaNodeDocGia(DocGiaNode*& Root,int MaTheCanXuLy){
+    if (Root == NULL){
         return;
     }
-
-    if (MaTheCanXuLy < Root->ThongTin.MaThe) {
-        XoaNodeDocGia(Root->Left, MaTheCanXuLy);
+    if (MaTheCanXuLy < Root->ThongTin.MaThe){
+        XoaNodeDocGia(Root->Left,MaTheCanXuLy);
     }
-    else if (MaTheCanXuLy > Root->ThongTin.MaThe) {
-        XoaNodeDocGia(Root->Right, MaTheCanXuLy);
+    else if (MaTheCanXuLy > Root->ThongTin.MaThe){
+        XoaNodeDocGia(Root->Right,MaTheCanXuLy);
     }
-    else {
-        // Đã tìm thấy node cần xóa (root hiện tại)
-        DocGiaNode* NodeCanXoa = Root;
-        // TH1: Node có 1 con hoặc không có con
-        if (Root->Left == NULL) {
+    else{
+        // Trường hợp không có cây con trái
+        if (Root->Left == NULL){
+            DocGiaNode* NodeCanXoa = Root;
             Root = Root->Right;
+            GiaiPhongDanhSachMuonTra(NodeCanXoa->ThongTin.MuonTraHead);
             delete NodeCanXoa;
         }
-        else if (Root->Right == NULL) {
+        // Trường hợp không có cây con phải
+        else if (Root->Right == NULL){
+            DocGiaNode* NodeCanXoa = Root;
             Root = Root->Left;
+            GiaiPhongDanhSachMuonTra(NodeCanXoa->ThongTin.MuonTraHead);
             delete NodeCanXoa;
         }
-        // TH2: Node có 2 con
-        else {
-            // Tìm phần tử thay thế (nhỏ nhất bên phải)
-            DocGiaNode* NodeTheMang = TimNodeNhoNhat(Root->Right);
-            // Sao chép giá trị
+        // Trường hợp có đủ hai cây con
+        else{
+            DocGiaNode* ChaNodeTheMang = Root;
+            DocGiaNode* NodeTheMang = Root->Right;
+            // Tìm node nhỏ nhất trong cây con phải
+            while (NodeTheMang->Left != NULL){
+                ChaNodeTheMang = NodeTheMang;
+                NodeTheMang = NodeTheMang->Left;
+            }
+            // Hoán đổi thông tin hai độc giả
+            DocGia ThongTinTam = Root->ThongTin;
             Root->ThongTin = NodeTheMang->ThongTin;
-            // Đệ quy xóa phần tử thay thế đó
-            XoaNodeDocGia(Root->Right, NodeTheMang->ThongTin.MaThe);
+            NodeTheMang->ThongTin = ThongTinTam;
+            // Nối lại cây sau khi bỏ node thế mạng
+            if (ChaNodeTheMang == Root){
+                ChaNodeTheMang->Right = NodeTheMang->Right;
+            }
+            else{
+                ChaNodeTheMang->Left = NodeTheMang->Right;
+            }
+            // Node thế mạng đang giữ thông tin của độc giả
+            // ban đầu cần xóa
+            GiaiPhongDanhSachMuonTra(NodeTheMang->ThongTin.MuonTraHead);
+            delete NodeTheMang;
         }
     }
 }
@@ -190,7 +216,7 @@ inline int PhanHoachDocGiaTheoMaThe(DocGia* MangDuLieu[], int ChiSoTrai, int Chi
     HoanDoiDocGia(MangDuLieu[i + 1], MangDuLieu[ChiSoPhai]);
     return i + 1;
 }
-// Hàm chính Quick Sort theo mã thẻ (Chia để trị)
+// Hàm chính Quick Sort theo mã thẻ 
 inline void QuickSortDocGiaTheoMaThe(DocGia* MangDuLieu[], int ChiSoTrai, int ChiSoPhai) {
     if (ChiSoTrai < ChiSoPhai) {
         int ViTriPhanHoach = PhanHoachDocGiaTheoMaThe(MangDuLieu, ChiSoTrai, ChiSoPhai);

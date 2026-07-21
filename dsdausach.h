@@ -126,51 +126,26 @@ inline bool XoaDauSach(DanhSachDauSach& DuLieuSach, const std::string& ISBNCanXu
 }
 
 // ====================== QUẢN LÝ BẢN SAO ======================
-// Tự động tạo 'n' bản sao cho đầu sách (kèm vị trí Kệ - Hàng)
-inline void
-TaoBanSaoTuDong(DauSach* DuLieuSach, int SoLuongCanXuLy, const std::string& KeSach, const std::string& HangSach) {
+// Tự động tạo các bản sao cho đầu sách.
+inline void TaoBanSaoTuDong(DauSach* DuLieuSach, int SoLuongCanXuLy) {
     if (DuLieuSach == NULL || SoLuongCanXuLy <= 0) {
         return;
     }
-    int ChiSoBatDau = DuLieuSach->SoLuongBanSao + 1; // Đánh số tiếp theo
+
+    int ChiSoBatDau = DuLieuSach->SoLuongBanSao + 1;
+
     for (int i = 0; i < SoLuongCanXuLy; i++) {
         DanhMucSachNode* NodeCanXuLy = new DanhMucSachNode();
-        // Mã sách dạng: ISBN-1, ISBN-2...
-        SaoChepChuoi(NodeCanXuLy->MaSach, MaxMaSach, TaoMaSach(DuLieuSach->ISBN, ChiSoBatDau + i));
+
+        SaoChepChuoi(
+            NodeCanXuLy->MaSach,
+            MaxMaSach,
+            TaoMaSach(DuLieuSach->ISBN, ChiSoBatDau + i)
+        );
+
         NodeCanXuLy->TrangThai = 0;
-        SaoChepChuoi(NodeCanXuLy->ViTri,
-            50,
-            std::string("Ke ") + CatKhoangTrangHaiDau(KeSach) + std::string(" - Hang ") +
-            CatKhoangTrangHaiDau(HangSach));
-        // Thêm vào cuối DSLK đơn
+
         ThemSachVaoCuoiDanhMuc(DuLieuSach, NodeCanXuLy);
-    }
-}
-// Lấy vị trí chung của các bản sao (nếu tất cả bản sao cùng chỗ)
-inline std::string LayViTriChung(const DauSach* DuLieuSach) {
-    if (DuLieuSach == NULL || DuLieuSach->DanhMucSachHead == NULL) {
-        return "(chua tao ban sao)";
-    }
-    const std::string ViTriDauTien = DuLieuSach->DanhMucSachHead->ViTri;
-    // Duyệt xem có bản sao nào khác vị trí đầu tiên không
-    for (const DanhMucSachNode* ConTroHienTai = DuLieuSach->DanhMucSachHead; ConTroHienTai != NULL;
-        ConTroHienTai = ConTroHienTai->Next) {
-        if (ConTroHienTai->ViTri != ViTriDauTien) {
-            return "";
-        } // Khác nhau -> trả về rỗng
-    }
-    return ViTriDauTien;
-}
-// Cập nhật vị trí kho cho TOÀN BỘ bản sao
-inline void DoiViTriTatCaBanSao(DauSach* DuLieuSach, const std::string& KeSach, const std::string& HangSach) {
-    if (DuLieuSach == NULL) {
-        return;
-    }
-    std::string NhanViTri =
-        std::string("Ke ") + CatKhoangTrangHaiDau(KeSach) + std::string(" - Hang ") + CatKhoangTrangHaiDau(HangSach);
-    for (DanhMucSachNode* ConTroHienTai = DuLieuSach->DanhMucSachHead; ConTroHienTai != NULL;
-        ConTroHienTai = ConTroHienTai->Next) {
-        SaoChepChuoi(ConTroHienTai->ViTri, 50, NhanViTri);
     }
 }
 // Xóa bớt bản sao (ưu tiên xóa từ cuối lên, bỏ qua sách đang mượn)

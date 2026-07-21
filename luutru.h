@@ -143,15 +143,6 @@ inline void GiaiPhongVectorDauSach(std::vector<DauSach*>& DanhSachDauSach) {
     DanhSachDauSach.clear();
 }
 // ----------------- Độc giả (BST) -----------------
-inline void GiaiPhongDanhSachMuonTra(MuonTraNode*& Head) {
-    MuonTraNode* ConTroHienTai = Head;
-    while (ConTroHienTai != NULL) {
-        MuonTraNode* NodeCanXoa = ConTroHienTai;
-        ConTroHienTai = ConTroHienTai->Next;
-        delete NodeCanXoa;
-    }
-    Head = NULL;
-}
 // Giải phóng toàn bộ cây BST độc giả
 inline void GiaiPhongCayDocGia(DocGiaNode*& Root) {
     if (Root == NULL) {
@@ -244,17 +235,14 @@ inline bool LuuDanhMucSach(const DanhSachDauSach& DanhSachDauSach) {
     if (!Fo) {
         return false;
     }
-    // Duyệt mảng tĩnh Nodes theo SoLuong phần tử.
     for (int i = 0; i < DanhSachDauSach.SoLuong; i++) {
         const DauSach* DuLieuSach = DanhSachDauSach.Nodes[i];
         if (DuLieuSach == NULL) {
             continue;
         }
-        DanhMucSachNode* ConTroHienTai = DuLieuSach->DanhMucSachHead;
-        while (ConTroHienTai != NULL) {
-            Fo << DuLieuSach->ISBN << "|" << ConTroHienTai->MaSach << "|" << (int)ConTroHienTai->TrangThai << "|"
-                << ConTroHienTai->ViTri << "\n";
-
+        DanhMucSachNode* ConTroHienTai =
+            DuLieuSach->DanhMucSachHead;
+        while (ConTroHienTai != NULL) {Fo << DuLieuSach->ISBN << "|"<< ConTroHienTai->MaSach << "|" << ConTroHienTai->TrangThai << "\n";
             ConTroHienTai = ConTroHienTai->Next;
         }
     }
@@ -263,45 +251,41 @@ inline bool LuuDanhMucSach(const DanhSachDauSach& DanhSachDauSach) {
 // 2. Đọc danh mục sách
 inline bool DocDanhMucSach(DanhSachDauSach& DanhSachDauSach) {
     std::ifstream Fi(DuongDanTepDanhMucSach().c_str());
-    if (!Fi) {
-        return true;
-    } // File chưa tồn tại thì coi như rỗng, không lỗi
+    if (!Fi) {return true;}
     std::string DongDuLieu;
     while (std::getline(Fi, DongDuLieu)) {
         if (DongDuLieu.empty()) {
             continue;
         }
-        size_t P1 = DongDuLieu.find('|');
-        if (P1 == std::string::npos) {
+        size_t ViTriDauThuNhat = DongDuLieu.find('|');
+        if (ViTriDauThuNhat == std::string::npos) {
             continue;
         }
-        size_t P2 = DongDuLieu.find('|', P1 + 1);
-        if (P2 == std::string::npos) {
+        size_t ViTriDauThuHai = DongDuLieu.find('|', ViTriDauThuNhat + 1);
+        if (ViTriDauThuHai == std::string::npos) {
             continue;
         }
-        size_t P3 = DongDuLieu.find('|', P2 + 1);
-        if (P3 == std::string::npos) {
-            continue;
-        }
-        std::string ISBNCanXuLy = DongDuLieu.substr(0, P1);
-        std::string MaSach = DongDuLieu.substr(P1 + 1, P2 - P1 - 1);
-        std::string STrangThai = DongDuLieu.substr(P2 + 1, P3 - P2 - 1);
-        std::string ViTri = DongDuLieu.substr(P3 + 1);
-        // Tìm đầu sách trong danh sách đã load
-        DauSach* DuLieuSach = TimDauSachTheoISBN(DanhSachDauSach, ISBNCanXuLy);
+        std::string ISBNCanXuLy = DongDuLieu.substr(0, ViTriDauThuNhat);
+        std::string MaSach = DongDuLieu.substr(ViTriDauThuNhat + 1,ViTriDauThuHai - ViTriDauThuNhat - 1);
+        std::string ChuoiTrangThai = DongDuLieu.substr(ViTriDauThuHai + 1);
+        DauSach* DuLieuSach = TimDauSachTheoISBN(DanhSachDauSach,ISBNCanXuLy);
         if (DuLieuSach == NULL) {
             continue;
-        } // Nếu không thấy ISBN tương ứng thì bỏ qua
+        }
+        DanhMucSachNode* NodeCanXuLy =  new DanhMucSachNode();
+        SaoChepChuoi(NodeCanXuLy->MaSach,MaxMaSach,MaSach
+        );
+        // Nếu không thấy ISBN tương ứng thì bỏ qua
         // Tạo node bản sao
-        int TrangThaiTam = std::atoi(STrangThai.c_str());
-        int ThoiGianHienTai = (TrangThaiTam == 1 ? 1 : 0);
-        DanhMucSachNode* NodeCanXuLy = new DanhMucSachNode();
-        SaoChepChuoi(NodeCanXuLy->MaSach, MaxMaSach, MaSach);
-        NodeCanXuLy->TrangThai = ThoiGianHienTai;
-        SaoChepChuoi(NodeCanXuLy->ViTri, 50, ViTri);
+        int TrangThaiTam = std::atoi(ChuoiTrangThai.c_str());
+        NodeCanXuLy->TrangThai =(TrangThaiTam == 1 ? 1 : 0);
         // Thêm vào DSLK đơn
-        ThemSachVaoCuoiDanhMuc(DuLieuSach, NodeCanXuLy);
+        ThemSachVaoCuoiDanhMuc(
+            DuLieuSach,
+            NodeCanXuLy
+        );
     }
+
     return true;
 }
 
@@ -403,88 +387,111 @@ inline bool LuuMuonTra(DocGiaNode* Root) {
     return true;
 }
 // Đọc danh sách mượn trả sách
-inline bool DocMuonTra(const DanhSachDauSach& DanhSachDauSach, DocGiaNode*& Root) {
-    std::ifstream Fi(DuongDanTepMuonTra().c_str());
-    if (!Fi) {
+inline bool DocMuonTra(
+    const DanhSachDauSach& DanhSachDauSach,DocGiaNode*& Root){
+    std::ifstream Fi( DuongDanTepMuonTra().c_str() );
+    if (!Fi){
         return true;
     }
+    NgayThangNam NgayHienTai = LayNgayHienTai();
     std::string DongDuLieu;
-    while (std::getline(Fi, DongDuLieu)) {
-        if (DongDuLieu.empty()) {
+    while (std::getline(Fi, DongDuLieu)){
+        if (DongDuLieu.empty()){
             continue;
         }
-        // Tách chuỗi thủ công
         std::string CacCot[5];
         int ChiSoCot = 0;
         std::string ChiSoHienTai = "";
-        for (char KyTuDoc : DongDuLieu) {
-            if (KyTuDoc == '|') {
-                if (ChiSoCot < 5) {
-                    CacCot[ChiSoCot++] = ChiSoHienTai;
+        for (char KyTuDoc : DongDuLieu){
+            if (KyTuDoc == '|'){
+                if (ChiSoCot < 5){
+                    CacCot[ChiSoCot] = ChiSoHienTai;
+                    ChiSoCot++;
                 }
                 ChiSoHienTai = "";
             }
-            else {
+            else{
                 ChiSoHienTai += KyTuDoc;
             }
         }
-        if (ChiSoCot < 5) {
-            CacCot[ChiSoCot++] = ChiSoHienTai;
+        if (ChiSoCot < 5){
+            CacCot[ChiSoCot] = ChiSoHienTai;
+            ChiSoCot++;
         }
-        if (ChiSoCot < 5) {
+        if (ChiSoCot < 5){
             continue;
         }
-        int MaTheCanXuLy = std::atoi(CacCot[0].c_str());
-        std::string MaSach = CacCot[1];
-        NgayThangNam NgayMuon{ 0, 0, 0 }, NgayTra{ 0, 0, 0 };
-        PhanTichChuoiNgay(CacCot[2], NgayMuon);
-        PhanTichChuoiNgay(CacCot[3], NgayTra);
+        int MaTheCanXuLy =  std::atoi(CacCot[0].c_str());
+        std::string MaSach =  CacCot[1];
         int TrangThaiTam = std::atoi(CacCot[4].c_str());
-        DocGiaNode* DgNode = TimDocGiaTheoMaThe(Root, MaTheCanXuLy);
-        if (DgNode == NULL) {
+        if (TrangThaiTam != 0 && TrangThaiTam != 1){
             continue;
         }
-        MuonTraNode* NodeCanXuLy = new MuonTraNode();
-        SaoChepChuoi(NodeCanXuLy->MaSach, MaxMaSach, MaSach);
-        NodeCanXuLy->NgayMuon = NgayMuon;
-        NodeCanXuLy->NgayTra = NgayTra;
-        NodeCanXuLy->TrangThai = static_cast<int>(TrangThaiTam);
-        NodeCanXuLy->Next = DgNode->ThongTin.MuonTraHead;
-        DgNode->ThongTin.MuonTraHead = NodeCanXuLy;
-        DauSach* DuLieuSach = TimDauSachTheoISBN(DanhSachDauSach, LayISBNTuMaSach(MaSach));
-        if (DuLieuSach != NULL) {
-            DanhMucSachNode* Copy = TimSachTheoMaSach(DuLieuSach, MaSach);
-            if (Copy != NULL) {
-                if (NodeCanXuLy->TrangThai == 0) {
-                    Copy->TrangThai = 1;
-                }
-                else {
-                    Copy->TrangThai = 0;
-                }
+        NgayThangNam NgayMuon{ 0, 0, 0 };
+        NgayThangNam NgayTra{ 0, 0, 0 };
+        // Ngày mượn phải hợp lệ và không được ở tương lai
+        if (!PhanTichChuoiNgay(CacCot[2],NgayMuon) || SoSanhNgay(NgayMuon,NgayHienTai) > 0){
+            continue;
+        }
+        // Phiếu đã trả phải có ngày trả hợp lệ
+        if (TrangThaiTam == 1){
+            if (!PhanTichChuoiNgay(CacCot[3],NgayTra) || SoSanhNgay(NgayTra,NgayMuon) < 0 || SoSanhNgay(NgayTra,NgayHienTai) > 0){
+                continue;
             }
         }
+        DocGiaNode* DgNode = TimDocGiaTheoMaThe(Root,MaTheCanXuLy);
+        if (DgNode == NULL){
+            continue;
+        }
+        DauSach* DuLieuSach = TimDauSachTheoISBN(DanhSachDauSach,LayISBNTuMaSach(MaSach));
+        DanhMucSachNode* BanSaoSach = NULL;
+        if (DuLieuSach != NULL){
+            BanSaoSach = TimSachTheoMaSach(DuLieuSach,MaSach);
+        }
+        // Chỉ phiếu đang mượn mới được thay đổi
+        // trạng thái bản sao thành đã mượn
+        if (TrangThaiTam == 0){
+            if (BanSaoSach == NULL || BanSaoSach->TrangThai != 0){
+                continue;
+            }
+            BanSaoSach->TrangThai = 1;
+        }
+        MuonTraNode* NodeCanXuLy = new MuonTraNode();
+        SaoChepChuoi( NodeCanXuLy->MaSach,MaxMaSach,MaSach );
+        NodeCanXuLy->NgayMuon = NgayMuon;
+        NodeCanXuLy->NgayTra = NgayTra;
+        NodeCanXuLy->TrangThai = TrangThaiTam;
+        NodeCanXuLy->Next = DgNode->ThongTin.MuonTraHead;
+        DgNode->ThongTin.MuonTraHead = NodeCanXuLy;
     }
     return true;
 }
 
 // ========================= LƯU / ĐỌC: TẤT CẢ DỮ LIỆU =========================
 // Lưu tất cả dữ liệu
-inline bool LuuToanBoDuLieu(const DanhSachDauSach& DanhSachDauSach, DocGiaNode* Root) {
+inline bool LuuToanBoDuLieu(const DanhSachDauSach& DanhSachDauSach,DocGiaNode* Root){
     bool Ok1 = LuuDauSach(DanhSachDauSach);
     bool Ok2 = LuuDanhMucSach(DanhSachDauSach);
     bool Ok3 = LuuDocGia(Root);
     bool Ok4 = LuuMuonTra(Root);
     return Ok1 && Ok2 && Ok3 && Ok4;
 }
-inline bool DocToanBoDuLieu(DanhSachDauSach& DanhSachDauSach, DocGiaNode*& Root) {
+inline bool DocToanBoDuLieu(DanhSachDauSach& DanhSachDauSach,DocGiaNode*& Root){
     GiaiPhongDanhSachDauSach(DanhSachDauSach);
     GiaiPhongCayDocGia(Root);
     bool Ok1 = DocDauSach(DanhSachDauSach);
     bool Ok2 = DocDanhMucSach(DanhSachDauSach);
-    for (int i = 0; i < DanhSachDauSach.SoLuong; ++i) {
+    for (int i = 0;i < DanhSachDauSach.SoLuong;i++){
         CapNhatSoLuongBanSao(DanhSachDauSach.Nodes[i]);
     }
+    // Không dùng trạng thái cũ trong dms.txt.
+    // Trạng thái thật được phục hồi từ phiếu đang mượn.
+    DatLaiTrangThaiTatCaBanSao(DanhSachDauSach);
     bool Ok3 = DocDocGia(Root);
-    bool Ok4 = DocMuonTra(DanhSachDauSach, Root);
+    bool Ok4 = DocMuonTra(DanhSachDauSach,Root);
+    // Sắp xếp lại mảng đầu sách sau khi nạp tệp
+    if (DanhSachDauSach.SoLuong > 1){
+        QuickSortTheoTenSach(DanhSachDauSach.Nodes,0,DanhSachDauSach.SoLuong - 1);
+    }
     return Ok1 && Ok2 && Ok3 && Ok4;
 }

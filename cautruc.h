@@ -29,8 +29,7 @@ struct NgayThangNam {
 
 struct DanhMucSachNode {
     char MaSach[MaxMaSach];
-    int TrangThai;               // 0: Cho muon, 1: Da muon, 
-    char ViTri[50];
+    int TrangThai;// 0: Cho muon, 1: Da muon
 
     DanhMucSachNode* Next;
 
@@ -84,7 +83,7 @@ struct MuonTraNode {
     NgayThangNam NgayMuon;
     NgayThangNam NgayTra;
 
-    int TrangThai;    // 0: Dang muon    // 1: Da tra   
+    int TrangThai;// 0: Dang muon, 1: Da tra   
 
     MuonTraNode* Next;
 
@@ -101,9 +100,9 @@ struct DocGia {
 
     char Ho[50];
     char Ten[30];
-    char Phai[5];               // "Nam" hoac "Nu"
+    char Phai[5]; // "Nam" hoac "Nu"
 
-    int TrangThaiThe;    // 0: Khoa    // 1: Hoat dong
+    int TrangThaiThe;// 0: Khoa, 1: Hoat dong
 
     MuonTraNode* MuonTraHead;
 
@@ -275,7 +274,45 @@ inline int TinhKhoangCachNgay(const NgayThangNam& GiaTriThuNhat, const NgayThang
 inline int TinhSoNgayChenhLech(const NgayThangNam& GiaTriThuHai, const NgayThangNam& GiaTriThuNhat) {
     return TinhKhoangCachNgay(GiaTriThuNhat, GiaTriThuHai);
 }
+// Lấy ngày hiện tại của hệ thống
+inline NgayThangNam LayNgayHienTai(){
+    std::time_t ThoiGianHienTai = std::time(NULL);
+    std::tm ThoiGianDiaPhuong{};
+#ifdef _WIN32
+    localtime_s(
+        &ThoiGianDiaPhuong,
+        &ThoiGianHienTai
+    );
+#else
+    std::tm* ConTroThoiGian =
+        std::localtime(&ThoiGianHienTai);
 
+    if (ConTroThoiGian != NULL)
+    {
+        ThoiGianDiaPhuong = *ConTroThoiGian;
+    }
+#endif
+    NgayThangNam KetQua;
+    KetQua.Ngay = ThoiGianDiaPhuong.tm_mday;
+    KetQua.Thang = ThoiGianDiaPhuong.tm_mon + 1;
+    KetQua.Nam = ThoiGianDiaPhuong.tm_year + 1900;
+    return KetQua;
+}
+  // Trả về:
+    // -1: ngày thứ nhất nhỏ hơn ngày thứ hai
+    //  0: hai ngày bằng nhau
+    //  1: ngày thứ nhất lớn hơn ngày thứ hai
+inline int SoSanhNgay(const NgayThangNam& GiaTriThuNhat,const NgayThangNam& GiaTriThuHai){
+    int SoThuTuThuNhat = ChuyenNgayThanhSoThuTu(GiaTriThuNhat);
+    int SoThuTuThuHai = ChuyenNgayThanhSoThuTu(GiaTriThuHai);
+    if (SoThuTuThuNhat < SoThuTuThuHai){
+        return -1;
+    }
+    if (SoThuTuThuNhat > SoThuTuThuHai){
+        return 1;
+    }
+    return 0;
+}
 // ----------------- Validate -----------------
 // Kiểm tra tên (không chứa số và ký tự đặc biệt)
 inline bool KiemTraTenHopLe(const std::string& ChuoiNhap) {
@@ -296,18 +333,6 @@ inline bool KiemTraToanChuSo(const std::string& ChuoiNhap) {
     }
     for (char KyTuDoc : ChuoiNhap) {
         if (!std::isdigit(static_cast<unsigned char>(KyTuDoc))) {
-            return false;
-        }
-    }
-    return true;
-}
-// Kiểm tra chuỗi toàn chữ cái
-inline bool KiemTraToanChuCai(const std::string& ChuoiNhap) {
-    if (ChuoiNhap.empty()) {
-        return false;
-    }
-    for (char KyTuDoc : ChuoiNhap) {
-        if (!std::isalpha(static_cast<unsigned char>(KyTuDoc))) {
             return false;
         }
     }

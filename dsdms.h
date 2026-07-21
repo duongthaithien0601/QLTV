@@ -50,7 +50,7 @@ inline void ThemSachVaoCuoiDanhMuc(DauSach* DuLieuSach, DanhMucSachNode* NodeCan
     }
     DuLieuSach->SoLuongBanSao++;
 }
-// Tách (gỡ) một node khỏi DSLK (không giải phóng bộ nhớ).
+// Tách (gỡ) một node khỏi DSLK.
 inline bool TachSachKhoiDanhMuc(DauSach* DuLieuSach, DanhMucSachNode* DoiTuongCanXuLy) {
     if (DuLieuSach == NULL || DoiTuongCanXuLy == NULL) {
         return false;
@@ -124,11 +124,24 @@ inline bool DanhDauSachDaTra(DanhMucSachNode* NodeCanXuLy) {
     return true;
 }
 
-// =================== RÀNG BUỘC TÍNH NHẤT QUÁN ===================
-// Đồng bộ lại SoLuongBanSao theo DSLK (gọi khi cần).
+// =================== KHÁC ===================
+// Đồng bộ lại SoLuongBanSao theo DSLK 
 inline void CapNhatSoLuongBanSao(DauSach* DuLieuSach) {
     if (DuLieuSach == NULL) {
         return;
     }
     DuLieuSach->SoLuongBanSao = DemTongSoBanSao(DuLieuSach);
+}
+// Đặt tất cả bản sao về trạng thái có thể cho mượn
+// trước khi khôi phục từ danh sách mượn trả
+inline void DatLaiTrangThaiTatCaBanSao(DanhSachDauSach& DanhSachDauSach){
+    for (int i = 0;i < DanhSachDauSach.SoLuong;i++){
+        DauSach* DuLieuSach = DanhSachDauSach.Nodes[i];
+        if (DuLieuSach == NULL){
+            continue;
+        }
+        for (DanhMucSachNode* ConTroHienTai = DuLieuSach->DanhMucSachHead;ConTroHienTai != NULL;ConTroHienTai = ConTroHienTai->Next){
+            ConTroHienTai->TrangThai = 0;
+        }
+    }
 }

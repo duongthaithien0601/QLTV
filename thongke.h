@@ -31,38 +31,45 @@ inline int DemSoSachDangMuon(const DauSach* DuLieuSach) {
 }
 
 // =================== THỐNG KÊ TOP 10 SÁCH MƯỢN NHIỀU NHẤT ===================
-inline void
-ThongKeTop10TheoLuotMuon(const DanhSachDauSach& DanhSachDauSach, DauSach* DanhSachKetQua[], int& SoLuongKetQua) {
-    SoLuongKetQua = 0;
-    // 1. Lọc sách có lượt mượn > 0
-    for (int i = 0; i < DanhSachDauSach.SoLuong; i++) {
+inline void ThongKeTop10TheoLuotMuon(const DanhSachDauSach& DanhSachDauSach,DauSach* DanhSachKetQua[],int& SoLuongKetQua){
+    DauSach* DanhSachTam[MaxDauSach];
+    int SoLuongTam = 0;
+    // Lấy toàn bộ đầu sách đã từng được mượn
+    for (int i = 0; i < DanhSachDauSach.SoLuong; i++){
         DauSach* DuLieuSach = DanhSachDauSach.Nodes[i];
-        if (DuLieuSach != NULL && DuLieuSach->SoLuotMuon > 0) {
-            DanhSachKetQua[SoLuongKetQua++] = DuLieuSach;
+        if (DuLieuSach != NULL && DuLieuSach->SoLuotMuon > 0){
+            DanhSachTam[SoLuongTam] = DuLieuSach;
+            SoLuongTam++;
         }
     }
-    // 2. Sắp xếp Bubble Sort giảm dần theo SoLuotMuon.
-    for (int i = 0; i < SoLuongKetQua - 1; i++) {
-        for (int j = i + 1; j < SoLuongKetQua; j++) {
+
+    // Sắp xếp giảm dần theo số lượt mượn
+    for (int i = 0; i < SoLuongTam - 1; i++){
+        for (int j = i + 1; j < SoLuongTam; j++){
             bool CanHoanDoi = false;
-            if (DanhSachKetQua[j]->SoLuotMuon > DanhSachKetQua[i]->SoLuotMuon) {
+            if (DanhSachTam[j]->SoLuotMuon > DanhSachTam[i]->SoLuotMuon){
                 CanHoanDoi = true;
             }
-            else if (DanhSachKetQua[j]->SoLuotMuon == DanhSachKetQua[i]->SoLuotMuon) {
-                if (std::strcmp(DanhSachKetQua[j]->TenSach, DanhSachKetQua[i]->TenSach) < 0) {
+            else if (DanhSachTam[j]->SoLuotMuon == DanhSachTam[i]->SoLuotMuon){
+                if (std::strcmp(DanhSachTam[j]->TenSach,DanhSachTam[i]->TenSach) < 0){
                     CanHoanDoi = true;
                 }
             }
-            if (CanHoanDoi) {
-                DauSach* DuLieuTam = DanhSachKetQua[i];
-                DanhSachKetQua[i] = DanhSachKetQua[j];
-                DanhSachKetQua[j] = DuLieuTam;
+            if (CanHoanDoi){
+                DauSach* DuLieuTam = DanhSachTam[i];
+                DanhSachTam[i] = DanhSachTam[j];
+                DanhSachTam[j] = DuLieuTam;
             }
         }
     }
-    // 3. Cắt lấy 10 phần tử
-    if (SoLuongKetQua > 10) {
+    // Chỉ lấy tối đa 10 đầu sách
+    SoLuongKetQua = SoLuongTam;
+    if (SoLuongKetQua > 10){
         SoLuongKetQua = 10;
+    }
+    // Sao chép kết quả sang mảng Top 10
+    for (int i = 0; i < SoLuongKetQua; i++){
+        DanhSachKetQua[i] = DanhSachTam[i];
     }
 }
 
