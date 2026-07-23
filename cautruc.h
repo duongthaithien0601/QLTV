@@ -3,7 +3,6 @@
 #endif
 #pragma once
 #include <string>
-#include <vector>
 #include <algorithm>
 #include <cctype>
 #include <ctime>
@@ -17,8 +16,7 @@
 
 const int HanMuonNgay = 7;
 
-//====================== NGAY ======================
-
+//====================== NGAY THANG NAM ======================
 struct NgayThangNam {
     int Ngay;
     int Thang;
@@ -26,10 +24,9 @@ struct NgayThangNam {
 };
 
 //====================== DANH MUC SACH ======================
-
 struct DanhMucSachNode {
     char MaSach[MaxMaSach];
-    int TrangThai;// 0: Cho muon, 1: Da muon
+    int TrangThai;
 
     DanhMucSachNode* Next;
 
@@ -40,7 +37,6 @@ struct DanhMucSachNode {
 };
 
 //====================== DAU SACH ======================
-
 struct DauSach {
     char ISBN[15];
     char TenSach[100];
@@ -63,7 +59,6 @@ struct DauSach {
 };
 
 //====================== DANH SACH DAU SACH ======================
-
 struct DanhSachDauSach {
     DauSach* Nodes[MaxDauSach];
     int SoLuong;
@@ -76,15 +71,12 @@ struct DanhSachDauSach {
 };
 
 //====================== MUON TRA ======================
-
 struct MuonTraNode {
     char MaSach[MaxMaSach];
+    int TrangThai;
 
     NgayThangNam NgayMuon;
     NgayThangNam NgayTra;
-
-    int TrangThai;// 0: Dang muon, 1: Da tra   
-
     MuonTraNode* Next;
 
     MuonTraNode() {
@@ -94,15 +86,12 @@ struct MuonTraNode {
 };
 
 //====================== DOC GIA ======================
-
 struct DocGia {
     int MaThe;
-
     char Ho[50];
     char Ten[30];
-    char Phai[5]; // "Nam" hoac "Nu"
-
-    int TrangThaiThe;// 0: Khoa, 1: Hoat dong
+    char Phai[5];
+    int TrangThaiThe;
 
     MuonTraNode* MuonTraHead;
 
@@ -114,10 +103,8 @@ struct DocGia {
 };
 
 //====================== CAY DOC GIA ======================
-
 struct DocGiaNode {
     DocGia ThongTin;
-
     DocGiaNode* Left;
     DocGiaNode* Right;
 
@@ -128,40 +115,8 @@ struct DocGiaNode {
     }
 };
 
-//====================== THONG KE QUA HAN ======================
-
-struct ThongKeQuaHan {
-    int MaThe;
-
-    char HoTen[100];
-    char MaSach[MaxMaSach];
-    char ISBN[15];
-    char TenSach[100];
-
-    NgayThangNam NgayMuon;
-
-    int SoNgayTre;
-
-    ThongKeQuaHan() {
-        MaThe = 0;
-        SoNgayTre = 0;
-    }
-};
-
-// ======================= HÀM DÙNG CHUNG =======================
-// Tìm đầu sách theo ISBN.
-inline DauSach* TimDauSachTheoISBN(const DanhSachDauSach& DuLieuSach,const std::string& ISBNCanXuLy){
-    for (int i = 0; i < DuLieuSach.SoLuong; i++) {
-        if (DuLieuSach.Nodes[i] != NULL && DuLieuSach.Nodes[i]->ISBN == ISBNCanXuLy){
-            return DuLieuSach.Nodes[i];
-        }
-    }
-
-    return NULL;
-}
-
-// ======================= HÀM TIỆN ÍCH =======================
-// Sao chep std::string vao mang char an toan.
+// ======================= XỬ LÝ CHUỖI DÙNG CHUNG =======================
+// Sao chép chuỗi std::string vào mảng char an toàn
 inline void SaoChepChuoi(char ChuoiDich[], int KichThuoc, const std::string& ChuoiNguon) {
     if (ChuoiDich == NULL || KichThuoc <= 0) {
         return;
@@ -170,8 +125,16 @@ inline void SaoChepChuoi(char ChuoiDich[], int KichThuoc, const std::string& Chu
     std::strncpy(ChuoiDich, ChuoiNguon.c_str(), static_cast<size_t>(KichThuoc - 1));
     ChuoiDich[KichThuoc - 1] = '\0';
 }
-
-// Cắt khoảng trắng đầu
+// Sao chép mảng char vào mảng char an toàn
+inline void SaoChepChuoi(char ChuoiDich[], int KichThuoc, const char ChuoiNguon[]) {
+    if (ChuoiDich == NULL || ChuoiNguon == NULL || KichThuoc <= 0) {
+        return;
+    }
+    std::strncpy(ChuoiDich, ChuoiNguon, static_cast<size_t>(KichThuoc - 1)
+    );
+    ChuoiDich[KichThuoc - 1] = '\0';
+}
+// Loại bỏ các khoảng trắng ở đầu chuỗi
 inline std::string CatKhoangTrangDau(const std::string& ChuoiNhap) {
     size_t i = 0;
     while (i < ChuoiNhap.size() && std::isspace(static_cast<unsigned char>(ChuoiNhap[i])) != 0) {
@@ -179,7 +142,7 @@ inline std::string CatKhoangTrangDau(const std::string& ChuoiNhap) {
     }
     return ChuoiNhap.substr(i);
 }
-// Cắt khoảng trắng đuôi
+// Loại bỏ các khoảng trắng ở cuối chuỗi
 inline std::string CatKhoangTrangCuoi(const std::string& ChuoiNhap) {
     if (ChuoiNhap.empty()) {
         return ChuoiNhap;
@@ -190,11 +153,11 @@ inline std::string CatKhoangTrangCuoi(const std::string& ChuoiNhap) {
     }
     return ChuoiNhap.substr(0, i);
 }
-// Cắt 2 đầu
+// Loại bỏ các khoảng trắng ở hai đầu chuỗi
 inline std::string CatKhoangTrangHaiDau(const std::string& ChuoiNhap) {
     return CatKhoangTrangCuoi(CatKhoangTrangDau(ChuoiNhap));
 }
-// Hàm nén khoảng trắng
+// Rút gọn nhiều khoảng trắng liên tiếp thành một khoảng trắng
 inline std::string RutGonKhoangTrang(const std::string& ChuoiNhap) {
     std::string KetQua;
     bool KyTuTruocLaKhoangTrang = true;
@@ -215,20 +178,20 @@ inline std::string RutGonKhoangTrang(const std::string& ChuoiNhap) {
     }
     return KetQua;
 }
-// Hàm chuyển chữ hoa
+// Chuyển toàn bộ ký tự trong chuỗi thành chữ hoa
 inline std::string ChuyenThanhChuHoa(std::string ChuoiNhap) {
     std::transform(ChuoiNhap.begin(), ChuoiNhap.end(), ChuoiNhap.begin(), [](unsigned char KyTuDoc) {
         return std::toupper(KyTuDoc);
         });
     return ChuoiNhap;
 }
-// Hàm chuẩn hóa tổng hợp (Sửa lại để kết hợp 2 hàm trên)
+// Chuẩn hóa chuỗi bằng cách rút gọn khoảng trắng và chuyển thành chữ hoa
 inline std::string ChuanHoaChuoi(const std::string& ChuoiNhap) {
     std::string ChuoiDaRutGon = RutGonKhoangTrang(ChuoiNhap);
     return ChuyenThanhChuHoa(ChuoiDaRutGon);
 }
-// ----------------- Ngày tháng -----------------
-// Kiểm tra tính hợp lệ của ngày tháng
+// ======================= XỬ LÝ NGÀY THÁNG =======================
+// Kiểm tra ngày, tháng và năm có tạo thành một ngày hợp lệ hay không
 inline bool KiemTraNgayHopLe(const NgayThangNam& GiaTriThuNhat) {
     if (GiaTriThuNhat.Nam <= 0 || GiaTriThuNhat.Thang < 1 || GiaTriThuNhat.Thang > 12 || GiaTriThuNhat.Ngay <= 0) {
         return false;
@@ -243,7 +206,7 @@ inline bool KiemTraNgayHopLe(const NgayThangNam& GiaTriThuNhat) {
     }
     return GiaTriThuNhat.Ngay <= SoNgayTrongThang[GiaTriThuNhat.Thang];
 }
-// Phân tích chuỗi thành ngày tháng định dạng dd/mm/yyyy
+// Chuyển chuỗi định dạng dd/mm/yyyy thành dữ liệu ngày tháng
 inline bool PhanTichNgayDDMMYYYY(const std::string& ChuoiNhap, NgayThangNam& KetQuaDauRa) {
     int NgayCanXuLy, M, Y;
     char DauPhanCachThuNhat, DauPhanCachThuHai;
@@ -258,15 +221,15 @@ inline bool PhanTichNgayDDMMYYYY(const std::string& ChuoiNhap, NgayThangNam& Ket
     }
     return false;
 }
-// Phân tích chuỗi thành ngày tháng định dạng dd/mm/yyyy.
+// Chuyển chuỗi định dạng dd/mm/yyyy thành dữ liệu ngày tháng
 inline NgayThangNam PhanTichNgayDDMMYYYY(const std::string& ChuoiNhap) {
     NgayThangNam NgayCanXuLy{ 0, 0, 0 };
     (void)PhanTichNgayDDMMYYYY(ChuoiNhap, NgayCanXuLy);
     return NgayCanXuLy;
 }
-// Chuyển ngày tháng thành chuỗi định dạng dd/mm/yyyy.
-inline std::string ChuyenNgayThanhChuoi(const NgayThangNam& NgayCanXuLy){
-    if (!KiemTraNgayHopLe(NgayCanXuLy)){
+// Chuyển dữ liệu ngày tháng thành chuỗi định dạng dd/mm/yyyy
+inline std::string ChuyenNgayThanhChuoi(const NgayThangNam& NgayCanXuLy) {
+    if (!KiemTraNgayHopLe(NgayCanXuLy)) {
         return "0/0/0";
     }
     char BoDem[16];
@@ -281,7 +244,7 @@ inline std::string ChuyenNgayThanhChuoi(const NgayThangNam& NgayCanXuLy){
 
     return std::string(BoDem);
 }
-// Lấy ngày hiện tại
+// Chuyển ngày tháng thành số thứ tự để phục vụ so sánh và tính khoảng cách
 inline int ChuyenNgayThanhSoThuTu(const NgayThangNam& GiaTriThuNhat) {
     int Y = GiaTriThuNhat.Nam;
     int M = GiaTriThuNhat.Thang;
@@ -292,24 +255,24 @@ inline int ChuyenNgayThanhSoThuTu(const NgayThangNam& GiaTriThuNhat) {
     }
     return 365 * Y + Y / 4 - Y / 100 + Y / 400 + (153 * M - 457) / 5 + NgayCanXuLy - 306;
 }
-// Tính số ngày chênh lệch: NgaySau - NgayTruoc.
-inline int TinhSoNgayChenhLech(const NgayThangNam& NgaySau,const NgayThangNam& NgayTruoc){
-    if (!KiemTraNgayHopLe(NgaySau) || !KiemTraNgayHopLe(NgayTruoc)){
+// Tính số ngày chênh lệch giữa hai mốc thời gian
+inline int TinhSoNgayChenhLech(const NgayThangNam& NgaySau, const NgayThangNam& NgayTruoc) {
+    if (!KiemTraNgayHopLe(NgaySau) || !KiemTraNgayHopLe(NgayTruoc)) {
         return 0;
     }
 
     return ChuyenNgayThanhSoThuTu(NgaySau) - ChuyenNgayThanhSoThuTu(NgayTruoc);
 }
-// Tính số ngày trễ của một phiếu mượn.
-inline int TinhSoNgayTre(const NgayThangNam& NgayMuon,const NgayThangNam& NgayKiemTra){
+// Tính số ngày quá hạn dựa trên thời hạn mượn quy định
+inline int TinhSoNgayTre(const NgayThangNam& NgayMuon, const NgayThangNam& NgayKiemTra) {
     int TongSoNgay = TinhSoNgayChenhLech(NgayKiemTra, NgayMuon);
     if (TongSoNgay <= HanMuonNgay) {
         return 0;
     }
     return TongSoNgay - HanMuonNgay;
 }
-// Lấy ngày hiện tại của hệ thống
-inline NgayThangNam LayNgayHienTai(){
+// Lấy ngày hiện tại từ hệ thống
+inline NgayThangNam LayNgayHienTai() {
     std::time_t ThoiGianHienTai = std::time(NULL);
     std::tm ThoiGianDiaPhuong{};
 #ifdef _WIN32
@@ -332,23 +295,20 @@ inline NgayThangNam LayNgayHienTai(){
     KetQua.Nam = ThoiGianDiaPhuong.tm_year + 1900;
     return KetQua;
 }
-  // Trả về:
-    // -1: ngày thứ nhất nhỏ hơn ngày thứ hai
-    //  0: hai ngày bằng nhau
-    //  1: ngày thứ nhất lớn hơn ngày thứ hai
-inline int SoSanhNgay(const NgayThangNam& GiaTriThuNhat,const NgayThangNam& GiaTriThuHai){
+// So sánh hai ngày và trả về kết quả nhỏ hơn, bằng hoặc lớn hơn
+inline int SoSanhNgay(const NgayThangNam& GiaTriThuNhat, const NgayThangNam& GiaTriThuHai) {
     int SoThuTuThuNhat = ChuyenNgayThanhSoThuTu(GiaTriThuNhat);
     int SoThuTuThuHai = ChuyenNgayThanhSoThuTu(GiaTriThuHai);
-    if (SoThuTuThuNhat < SoThuTuThuHai){
+    if (SoThuTuThuNhat < SoThuTuThuHai) {
         return -1;
     }
-    if (SoThuTuThuNhat > SoThuTuThuHai){
+    if (SoThuTuThuNhat > SoThuTuThuHai) {
         return 1;
     }
     return 0;
 }
-// ----------------- Validate -----------------
-// Kiểm tra tên (không chứa số và ký tự đặc biệt)
+// ======================= KIỂM TRA DỮ LIỆU DÙNG CHUNG =======================
+// Kiểm tra chuỗi tên không chứa chữ số hoặc ký tự đặc biệt
 inline bool KiemTraTenHopLe(const std::string& ChuoiNhap) {
     for (unsigned char KyTuDoc : ChuoiNhap) {
         if (std::isdigit(KyTuDoc)) {
@@ -360,7 +320,7 @@ inline bool KiemTraTenHopLe(const std::string& ChuoiNhap) {
     }
     return true;
 }
-// Kiểm tra chuỗi toàn chữ số
+// Kiểm tra chuỗi chỉ chứa các chữ số
 inline bool KiemTraToanChuSo(const std::string& ChuoiNhap) {
     if (ChuoiNhap.empty()) {
         return false;
@@ -372,18 +332,163 @@ inline bool KiemTraToanChuSo(const std::string& ChuoiNhap) {
     }
     return true;
 }
-// ----------------- Mã sách / ISBN -----------------
-// Lấy ISBN từ mã sách
-inline std::string LayISBNTuMaSach(const std::string& MaSach) {
-    size_t ViTri = MaSach.find('-');
-    if (ViTri == std::string::npos) {
-        return MaSach;
-    }
-    return MaSach.substr(0, ViTri);
+// Kiểm tra một số nguyên có nằm trong khoảng cho phép hay không
+inline bool KiemTraSoTrongKhoang(int GiaTri, int GiaTriNhoNhat, int GiaTriLonNhat) {
+    return GiaTri >= GiaTriNhoNhat && GiaTri <= GiaTriLonNhat;
 }
-// Tạo mã sách từ ISBN và chỉ số
-inline std::string TaoMaSach(const std::string& ISBNCanXuLy, int ChiSo) {
-    std::ostringstream Oss;
-    Oss << CatKhoangTrangHaiDau(ISBNCanXuLy) << "-" << ChiSo;
-    return Oss.str();
+// Kiểm tra ngày hợp lệ và không lớn hơn ngày hiện tại
+inline bool KiemTraNgayKhongVuotQuaHienTai(const NgayThangNam& NgayCanKiemTra) {
+    return KiemTraNgayHopLe(NgayCanKiemTra) &&
+        NgayCanKiemTra.Nam >= 1500 &&
+        SoSanhNgay(NgayCanKiemTra, LayNgayHienTai()) <= 0;
+}
+// Kiểm tra toàn bộ dữ liệu nhập khi thêm đầu sách mới
+inline bool KiemTraThongTinDauSachNhap(
+    const std::string& TenSach,
+    const std::string& TacGia,
+    const std::string& TheLoai,
+    int SoTrang,
+    int NamXuatBan,
+    int SoLuongBanSao,
+    std::string* ThongBaoLoi = NULL
+) {
+    if (TenSach.empty()) {
+        if (ThongBaoLoi != NULL) {
+            *ThongBaoLoi = "Ten sach khong hop le.";
+        }
+        return false;
+    }
+    if (TacGia.empty() || !KiemTraTenHopLe(TacGia)) {
+        if (ThongBaoLoi != NULL) {
+            *ThongBaoLoi = "Tac gia khong hop le.";
+        }
+        return false;
+    }
+    if (TheLoai.empty() || !KiemTraTenHopLe(TheLoai)) {
+        if (ThongBaoLoi != NULL) {
+            *ThongBaoLoi = "The loai khong hop le.";
+        }
+        return false;
+    }
+    if (!KiemTraSoTrongKhoang(SoTrang, 1, 5000)) {
+        if (ThongBaoLoi != NULL) {
+            *ThongBaoLoi = "So trang phai tu 1 den 5000.";
+        }
+        return false;
+    }
+    if (!KiemTraSoTrongKhoang(NamXuatBan, 1500, LayNgayHienTai().Nam)) {
+        if (ThongBaoLoi != NULL) {
+            *ThongBaoLoi = "Nam xuat ban khong hop le.";
+        }
+        return false;
+    }
+    if (!KiemTraSoTrongKhoang(SoLuongBanSao, 1, 5000)) {
+        if (ThongBaoLoi != NULL) {
+            *ThongBaoLoi = "So luong ban sao phai tu 1 den 5000.";
+        }
+        return false;
+    }
+    return true;
+}
+// Kiểm tra toàn bộ dữ liệu nhập khi thêm độc giả mới
+inline bool KiemTraThongTinDocGiaNhap(
+    const std::string& Ho,
+    const std::string& Ten,
+    const std::string& Phai,
+    int TrangThaiThe,
+    std::string* ThongBaoLoi = NULL
+) {
+    if (Ho.empty() || !KiemTraTenHopLe(Ho)) {
+        if (ThongBaoLoi != NULL) {
+            *ThongBaoLoi = "Ho va ten dem khong hop le.";
+        }
+        return false;
+    }
+    if (Ten.empty() || !KiemTraTenHopLe(Ten)) {
+        if (ThongBaoLoi != NULL) {
+            *ThongBaoLoi = "Ten khong hop le.";
+        }
+        return false;
+    }
+    if (Phai != "Nam" && Phai != "Nu") {
+        if (ThongBaoLoi != NULL) {
+            *ThongBaoLoi = "Gioi tinh khong hop le.";
+        }
+        return false;
+    }
+    if (TrangThaiThe != 0 && TrangThaiThe != 1) {
+        if (ThongBaoLoi != NULL) {
+            *ThongBaoLoi = "Trang thai the khong hop le.";
+        }
+        return false;
+    }
+    return true;
+}
+// Kiểm tra các dữ liệu được nhập khi cập nhật đầu sách
+inline bool KiemTraThongTinDauSachCapNhat(
+    const std::string& TenSach,
+    const std::string& TacGia,
+    int NamXuatBan,
+    int SoTrang,
+    std::string* ThongBaoLoi = NULL
+) {
+    if (!TenSach.empty() && ChuanHoaChuoi(TenSach).empty()) {
+        if (ThongBaoLoi != NULL) {
+            *ThongBaoLoi = "Ten sach khong hop le.";
+        }
+        return false;
+    }
+    if (!TacGia.empty() && !KiemTraTenHopLe(ChuanHoaChuoi(TacGia))) {
+        if (ThongBaoLoi != NULL) {
+            *ThongBaoLoi = "Tac gia khong hop le.";
+        }
+        return false;
+    }
+    if (NamXuatBan != 0 && !KiemTraSoTrongKhoang(NamXuatBan, 1500, LayNgayHienTai().Nam)) {
+        if (ThongBaoLoi != NULL) {
+            *ThongBaoLoi = "Nam xuat ban khong hop le.";
+        }
+        return false;
+    }
+    if (SoTrang != 0 && !KiemTraSoTrongKhoang(SoTrang, 1, 5000)) {
+        if (ThongBaoLoi != NULL) {
+            *ThongBaoLoi = "So trang phai tu 1 den 5000.";
+        }
+        return false;
+    }
+    return true;
+}
+// Kiểm tra các dữ liệu được nhập khi cập nhật độc giả
+inline bool KiemTraThongTinDocGiaCapNhat(
+    const std::string& Ho,
+    const std::string& Ten,
+    const std::string& Phai,
+    int TrangThaiThe,
+    std::string* ThongBaoLoi = NULL
+) {
+    if (!Ho.empty() && !KiemTraTenHopLe(ChuanHoaChuoi(Ho))) {
+        if (ThongBaoLoi != NULL) {
+            *ThongBaoLoi = "Ho va ten dem khong hop le.";
+        }
+        return false;
+    }
+    if (!Ten.empty() && !KiemTraTenHopLe(ChuanHoaChuoi(Ten))) {
+        if (ThongBaoLoi != NULL) {
+            *ThongBaoLoi = "Ten khong hop le.";
+        }
+        return false;
+    }
+    if (Phai != "Nam" && Phai != "Nu") {
+        if (ThongBaoLoi != NULL) {
+            *ThongBaoLoi = "Gioi tinh khong hop le.";
+        }
+        return false;
+    }
+    if (TrangThaiThe != 0 && TrangThaiThe != 1) {
+        if (ThongBaoLoi != NULL) {
+            *ThongBaoLoi = "Trang thai the khong hop le.";
+        }
+        return false;
+    }
+    return true;
 }

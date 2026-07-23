@@ -4,8 +4,9 @@
 #include <ctime>
 #include "cautruc.h"
 
+
 // =================== CÁC HÀM TÌM KIẾM TRÊN CÂY ===================
-// Tìm kiếm độc giả theo Mã thẻ (Binary Search)
+// Tìm độc giả trên cây nhị phân theo mã thẻ
 inline DocGiaNode* TimDocGiaTheoMaThe(DocGiaNode* Root, int MaTheCanXuLy) {
     DocGiaNode* ConTroHienTai = Root;
     while (ConTroHienTai != NULL) {
@@ -21,13 +22,13 @@ inline DocGiaNode* TimDocGiaTheoMaThe(DocGiaNode* Root, int MaTheCanXuLy) {
     }
     return NULL; // Không tìm thấy
 }
-// Kiểm tra xem mã thẻ đã tồn tại hay chưa
+// Kiểm tra mã thẻ đã tồn tại trên cây độc giả hay chưa
 inline bool KiemTraMaTheTonTai(DocGiaNode* Root, int MaTheCanXuLy) {
     return TimDocGiaTheoMaThe(Root, MaTheCanXuLy) != NULL;
 }
 
 // =================== THAY ĐỔI CẤU TRÚC CÂY (THÊM / XÓA NODE) =====================
-// Chèn một độc giả mới vào cây (BST Insertion)
+// Thêm một độc giả vào cây nhị phân tìm kiếm
 inline void ThemDocGiaVaoCay(DocGiaNode*& Root, const DocGia& GiaTriCanThem) {
     if (Root == NULL) {
         Root = new DocGiaNode(GiaTriCanThem);
@@ -35,7 +36,6 @@ inline void ThemDocGiaVaoCay(DocGiaNode*& Root, const DocGia& GiaTriCanThem) {
     }
     DocGiaNode* ConTroHienTai = Root;
     DocGiaNode* Parent = NULL;
-    // Tìm vị trí lá (leaf) phù hợp
     while (ConTroHienTai != NULL) {
         Parent = ConTroHienTai;
         if (GiaTriCanThem.MaThe < ConTroHienTai->ThongTin.MaThe) {
@@ -45,11 +45,9 @@ inline void ThemDocGiaVaoCay(DocGiaNode*& Root, const DocGia& GiaTriCanThem) {
             ConTroHienTai = ConTroHienTai->Right;
         }
         else {
-            // Trùng mã thẻ -> Không thêm để bảo toàn dữ liệu cũ
             return;
         }
     }
-    // Gắn node mới vào cha
     if (GiaTriCanThem.MaThe < Parent->ThongTin.MaThe) {
         Parent->Left = new DocGiaNode(GiaTriCanThem);
     }
@@ -57,62 +55,54 @@ inline void ThemDocGiaVaoCay(DocGiaNode*& Root, const DocGia& GiaTriCanThem) {
         Parent->Right = new DocGiaNode(GiaTriCanThem);
     }
 }
-// Giải phóng toàn bộ danh sách mượn trả của một độc giả
-inline void GiaiPhongDanhSachMuonTra(MuonTraNode*& Head){
-    while (Head != NULL){
+// Giải phóng danh sách mượn trả của một độc giả
+inline void GiaiPhongDanhSachMuonTra(MuonTraNode*& Head) {
+    while (Head != NULL) {
         MuonTraNode* NodeCanXoa = Head;
         Head = Head->Next;
         delete NodeCanXoa;
     }
 }
-// Hàm đệ quy xóa node theo Mã thẻ (BST Deletion)
-inline void XoaNodeDocGia(DocGiaNode*& Root,int MaTheCanXuLy){
-    if (Root == NULL){
+// Xóa node độc giả khỏi cây nhị phân theo mã thẻ
+inline void XoaNodeDocGia(DocGiaNode*& Root, int MaTheCanXuLy) {
+    if (Root == NULL) {
         return;
     }
-    if (MaTheCanXuLy < Root->ThongTin.MaThe){
-        XoaNodeDocGia(Root->Left,MaTheCanXuLy);
+    if (MaTheCanXuLy < Root->ThongTin.MaThe) {
+        XoaNodeDocGia(Root->Left, MaTheCanXuLy);
     }
-    else if (MaTheCanXuLy > Root->ThongTin.MaThe){
-        XoaNodeDocGia(Root->Right,MaTheCanXuLy);
+    else if (MaTheCanXuLy > Root->ThongTin.MaThe) {
+        XoaNodeDocGia(Root->Right, MaTheCanXuLy);
     }
-    else{
-        // Trường hợp không có cây con trái
-        if (Root->Left == NULL){
+    else {
+        if (Root->Left == NULL) {
             DocGiaNode* NodeCanXoa = Root;
             Root = Root->Right;
             GiaiPhongDanhSachMuonTra(NodeCanXoa->ThongTin.MuonTraHead);
             delete NodeCanXoa;
         }
-        // Trường hợp không có cây con phải
-        else if (Root->Right == NULL){
+        else if (Root->Right == NULL) {
             DocGiaNode* NodeCanXoa = Root;
             Root = Root->Left;
             GiaiPhongDanhSachMuonTra(NodeCanXoa->ThongTin.MuonTraHead);
             delete NodeCanXoa;
         }
-        // Trường hợp có đủ hai cây con
-        else{
+        else {
             DocGiaNode* ChaNodeTheMang = Root;
             DocGiaNode* NodeTheMang = Root->Right;
-            // Tìm node nhỏ nhất trong cây con phải
-            while (NodeTheMang->Left != NULL){
+            while (NodeTheMang->Left != NULL) {
                 ChaNodeTheMang = NodeTheMang;
                 NodeTheMang = NodeTheMang->Left;
             }
-            // Hoán đổi thông tin hai độc giả
             DocGia ThongTinTam = Root->ThongTin;
             Root->ThongTin = NodeTheMang->ThongTin;
             NodeTheMang->ThongTin = ThongTinTam;
-            // Nối lại cây sau khi bỏ node thế mạng
-            if (ChaNodeTheMang == Root){
+            if (ChaNodeTheMang == Root) {
                 ChaNodeTheMang->Right = NodeTheMang->Right;
             }
-            else{
+            else {
                 ChaNodeTheMang->Left = NodeTheMang->Right;
             }
-            // Node thế mạng đang giữ thông tin của độc giả
-            // ban đầu cần xóa
             GiaiPhongDanhSachMuonTra(NodeTheMang->ThongTin.MuonTraHead);
             delete NodeTheMang;
         }
@@ -120,7 +110,7 @@ inline void XoaNodeDocGia(DocGiaNode*& Root,int MaTheCanXuLy){
 }
 
 // ==================== TIỆN ÍCH & LOGIC NGHIỆP VỤ ====================
-// Đếm số lượng sách độc giả đang mượn (để kiểm tra điều kiện xóa)
+// Đếm số sách độc giả hiện đang mượn
 inline int DemSoSachDocGiaDangMuon(const DocGia& DocGiaCanXuLy) {
     int SoLuongDem = 0;
     for (MuonTraNode* ConTroHienTai = DocGiaCanXuLy.MuonTraHead; ConTroHienTai != NULL;
@@ -131,39 +121,30 @@ inline int DemSoSachDocGiaDangMuon(const DocGia& DocGiaCanXuLy) {
     }
     return SoLuongDem;
 }
-// Xóa độc giả an toàn (Chỉ xóa nếu không còn giữ sách thư viện)
+// Xóa độc giả nếu không còn giữ sách của thư viện
 inline bool XoaDocGiaNeuKhongMuonSach(DocGiaNode*& Root, int MaTheCanXuLy) {
     DocGiaNode* ConTroHienTai = TimDocGiaTheoMaThe(Root, MaTheCanXuLy);
     if (ConTroHienTai == NULL) {
         return false;
     } // Không tồn tại
-    // Nếu đang mượn sách -> Từ chối xóa
     if (DemSoSachDocGiaDangMuon(ConTroHienTai->ThongTin) > 0) {
         return false;
     }
-    // Thực hiện xóa
     XoaNodeDocGia(Root, MaTheCanXuLy);
     return true;
 }
-// Sinh mã thẻ ngẫu nhiên và đảm bảo duy nhất
+// Tạo mã thẻ ngẫu nhiên và bảo đảm không trùng
 inline int TaoMaTheKhongTrung(DocGiaNode* Root) {
-    static std::mt19937 Rng(static_cast<unsigned>(std::time(NULL)));
-    std::uniform_int_distribution<int> Dist(100000, 999999);
-    // Thử random 2048 lần
-    for (int i = 0; i < 2048; i++) {
-        int GiaTriDuKien = Dist(Rng);
-        if (!KiemTraMaTheTonTai(Root, GiaTriDuKien)) {
-            return GiaTriDuKien;
+    static std::mt19937 Rng(static_cast<unsigned int>(std::time(NULL)));
+    static std::uniform_int_distribution<int> Dist(100000, 999999);
+    while (true) {
+        int MaTheMoi = Dist(Rng);
+        if (!KiemTraMaTheTonTai(Root, MaTheMoi)) {
+            return MaTheMoi;
         }
     }
-    for (int GiaTriDuKien = 100000; GiaTriDuKien <= 999999; GiaTriDuKien++) {
-        if (!KiemTraMaTheTonTai(Root, GiaTriDuKien)) {
-            return GiaTriDuKien;
-        }
-    }
-    return 999999;
 }
-// Đếm tổng số node (số lượng độc giả) trên cây
+// Đếm tổng số độc giả trên cây
 inline int DemTongDocGia(DocGiaNode* Root) {
     if (Root == NULL) {
         return 0;
@@ -171,9 +152,72 @@ inline int DemTongDocGia(DocGiaNode* Root) {
     return 1 + DemTongDocGia(Root->Left) + DemTongDocGia(Root->Right);
 }
 
+// =================== NGHIỆP VỤ THÊM / CẬP NHẬT ĐỘC GIẢ ===================
+// Kiểm tra dữ liệu và thêm độc giả mới vào cây
+inline bool ThemDocGia(
+    DocGiaNode*& Root,
+    int MaTheCanXuLy,
+    const std::string& HoNhap,
+    const std::string& TenNhap,
+    const std::string& PhaiNhap,
+    int TrangThaiNhap,
+    std::string* ThongBaoLoi = NULL
+){
+    std::string HoDaChuanHoa = ChuanHoaChuoi(HoNhap);
+    std::string TenDaChuanHoa = ChuanHoaChuoi(TenNhap);
+    if (MaTheCanXuLy <= 0 || KiemTraMaTheTonTai(Root, MaTheCanXuLy)) {
+        if (ThongBaoLoi != NULL) {
+            *ThongBaoLoi = "Ma the khong hop le hoac da ton tai.";
+        }
+        return false;
+    }
+    if (!KiemTraThongTinDocGiaNhap(HoDaChuanHoa, TenDaChuanHoa, PhaiNhap, TrangThaiNhap, ThongBaoLoi)){
+        return false;
+    }
+    DocGia DocGiaCanThem;
+    DocGiaCanThem.MaThe = MaTheCanXuLy;
+    SaoChepChuoi(DocGiaCanThem.Ho, 50, HoDaChuanHoa);
+    SaoChepChuoi(DocGiaCanThem.Ten, 30, TenDaChuanHoa);
+    SaoChepChuoi(DocGiaCanThem.Phai, 5, PhaiNhap);
+    DocGiaCanThem.TrangThaiThe = TrangThaiNhap;
+    DocGiaCanThem.MuonTraHead = NULL;
+    ThemDocGiaVaoCay(Root, DocGiaCanThem);
+    return true;
+}
+// Cập nhật thông tin của độc giả theo mã thẻ
+inline bool CapNhatThongTinDocGia(
+    DocGiaNode* Root,
+    int MaTheCanXuLy,
+    const std::string& HoMoi,
+    const std::string& TenMoi,
+    const std::string& PhaiMoi,
+    int TrangThaiMoi,
+    std::string* ThongBaoLoi = NULL
+) {
+    DocGiaNode* NodeDocGia = TimDocGiaTheoMaThe(Root, MaTheCanXuLy);
+    if (NodeDocGia == NULL) {
+        if (ThongBaoLoi != NULL) {
+            *ThongBaoLoi = "Khong tim thay doc gia.";
+        }
+        return false;
+    }
+    std::string HoDaChuanHoa = ChuanHoaChuoi(HoMoi);
+    std::string TenDaChuanHoa = ChuanHoaChuoi(TenMoi);
+    if (!KiemTraThongTinDocGiaCapNhat(HoMoi, TenMoi, PhaiMoi, TrangThaiMoi, ThongBaoLoi)){
+        return false;
+    }
+    if (!HoMoi.empty()) {
+        SaoChepChuoi(NodeDocGia->ThongTin.Ho, 50, HoDaChuanHoa);
+    }
+    if (!TenMoi.empty()) {
+        SaoChepChuoi(NodeDocGia->ThongTin.Ten, 30, TenDaChuanHoa);
+    }
+    SaoChepChuoi(NodeDocGia->ThongTin.Phai, 5, PhaiMoi);
+    NodeDocGia->ThongTin.TrangThaiThe = TrangThaiMoi;
+    return true;
+}
+
 // ===================== CHUYỂN ĐỔI DỮ LIỆU CÂY -> MẢNG ===========================
-// Duyệt cây theo thứ tự LNR (Left-Node-Right) để lấy danh sách đã sắp xếp sơ bộ theo Mã thẻ
-// Kết quả lưu vào mảng tĩnh arr[] để phục vụ in ấn hoặc sắp xếp lại theo tên
 inline void DuyetLNRChuyenThanhMang(DocGiaNode* Root, DocGia* MangDuLieu[], int& SoPhanTu) {
     if (Root == NULL) {
         return;
@@ -187,13 +231,14 @@ inline void DuyetLNRChuyenThanhMang(DocGiaNode* Root, DocGia* MangDuLieu[], int&
 }
 
 // ================== THUẬT TOÁN SẮP XẾP ==================
-// Hoán đổi 2 con trỏ DocGia*
+// Hoán đổi vị trí của hai con trỏ độc giả
 inline void HoanDoiDocGia(DocGia*& GiaTriThuNhat, DocGia*& GiaTriThuHai) {
     DocGia* Temp = GiaTriThuNhat;
     GiaTriThuNhat = GiaTriThuHai;
     GiaTriThuHai = Temp;
 }
 // --- 1. Sắp xếp Độc giả theo MÃ THẺ (Tăng dần) (Đệ Quy) ---
+// Phân hoạch mảng độc giả theo mã thẻ
 inline int PhanHoachDocGiaTheoMaThe(DocGia* MangDuLieu[], int ChiSoTrai, int ChiSoPhai) {
     int GiaTriChot = MangDuLieu[ChiSoPhai]->MaThe;
     int i = ChiSoTrai - 1;
@@ -206,7 +251,7 @@ inline int PhanHoachDocGiaTheoMaThe(DocGia* MangDuLieu[], int ChiSoTrai, int Chi
     HoanDoiDocGia(MangDuLieu[i + 1], MangDuLieu[ChiSoPhai]);
     return i + 1;
 }
-// Hàm chính Quick Sort theo mã thẻ 
+// Sắp xếp độc giả tăng dần theo mã thẻ
 inline void QuickSortDocGiaTheoMaThe(DocGia* MangDuLieu[], int ChiSoTrai, int ChiSoPhai) {
     if (ChiSoTrai < ChiSoPhai) {
         int ViTriPhanHoach = PhanHoachDocGiaTheoMaThe(MangDuLieu, ChiSoTrai, ChiSoPhai);
@@ -215,23 +260,20 @@ inline void QuickSortDocGiaTheoMaThe(DocGia* MangDuLieu[], int ChiSoTrai, int Ch
     }
 }
 // --- 2. Sắp xếp Độc giả theo TÊN + HỌ (A -> Z) ---
-// Ưu tiên: Tên -> Họ -> Mã thẻ
-inline int PhanHoachDocGiaTheoTenHo(DocGia* MangDuLieu[], int ChiSoTrai, int ChiSoPhai) {
+// Phân hoạch mảng độc giả theo tên, họ và mã thẻ
+inline int PhanHoachDocGiaTheoTenHo(DocGia* MangDuLieu[], int ChiSoTrai, int ChiSoPhai){
     DocGia* GiaTriChot = MangDuLieu[ChiSoPhai];
     int i = ChiSoTrai - 1;
     for (int j = ChiSoTrai; j < ChiSoPhai; j++) {
         bool Condition = false;
-        // So sánh Tên trước
         if (std::strcmp(MangDuLieu[j]->Ten, GiaTriChot->Ten) < 0) {
             Condition = true;
         }
         else if (std::strcmp(MangDuLieu[j]->Ten, GiaTriChot->Ten) == 0) {
-            // Tên trùng thì so sánh Họ
             if (std::strcmp(MangDuLieu[j]->Ho, GiaTriChot->Ho) < 0) {
                 Condition = true;
             }
-            // Nếu Tên và Họ đều trùng, so sánh Mã thẻ để ổn định vị trí
-            else if (std::strcmp(MangDuLieu[j]->Ho, GiaTriChot->Ho) == 0 && MangDuLieu[j]->MaThe < GiaTriChot->MaThe) {
+            else if (std::strcmp(MangDuLieu[j]->Ho, GiaTriChot->Ho) == 0 && MangDuLieu[j]->MaThe < GiaTriChot->MaThe){
                 Condition = true;
             }
         }
@@ -243,11 +285,23 @@ inline int PhanHoachDocGiaTheoTenHo(DocGia* MangDuLieu[], int ChiSoTrai, int Chi
     HoanDoiDocGia(MangDuLieu[i + 1], MangDuLieu[ChiSoPhai]);
     return i + 1;
 }
-// Hàm chính Quick Sort theo TÊN + HỌ
+// Sắp xếp độc giả tăng dần theo tên và họ
 inline void QuickSortDocGiaTheoTenHo(DocGia* MangDuLieu[], int ChiSoTrai, int ChiSoPhai) {
     if (ChiSoTrai < ChiSoPhai) {
         int ViTriPhanHoach = PhanHoachDocGiaTheoTenHo(MangDuLieu, ChiSoTrai, ChiSoPhai);
         QuickSortDocGiaTheoTenHo(MangDuLieu, ChiSoTrai, ViTriPhanHoach - 1);
         QuickSortDocGiaTheoTenHo(MangDuLieu, ViTriPhanHoach + 1, ChiSoPhai);
     }
+}
+
+// =================== GIẢI PHÓNG BỘ NHỚ ===================
+inline void GiaiPhongCayDocGia(DocGiaNode*& Root) {
+    if (Root == NULL) {
+        return;
+    }
+    GiaiPhongCayDocGia(Root->Left);
+    GiaiPhongCayDocGia(Root->Right);
+    GiaiPhongDanhSachMuonTra(Root->ThongTin.MuonTraHead);
+    delete Root;
+    Root = NULL;
 }

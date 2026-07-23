@@ -1,38 +1,35 @@
 #include <iostream>
-#include <vector>
-#include <algorithm>
-#include <string>
 #include "cautruc.h"
-#include "dsdms.h"
-#include "dsdocgia.h"
-#include "dsdausach.h"
-#include "dsmuontra.h"
+#include "dausach.h"
+#include "docgia.h"
+#include "muontra.h"
+#include "thongke.h"
 #include "luutru.h"
-#include "menu_tui.h"
+#include "giaodien.h"
 
 int main() {
-    // 1. Tối ưu hóa tốc độ nhập/xuất (I/O)
+    // Tối ưu tốc độ nhập xuất
     std::ios::sync_with_stdio(false);
-    std::cin.tie(nullptr);
-    // 2. Khởi tạo cấu trúc dữ liệu chính
+    std::cin.tie(NULL);
+    // Khởi tạo dữ liệu chính của chương trình
     DanhSachDauSach DanhSachDauSach;
     DocGiaNode* Root = NULL;
-    // 3. Nạp dữ liệu từ File
+    // Đọc dữ liệu đã lưu trước khi mở menu
     if (!DocToanBoDuLieu(DanhSachDauSach, Root)) {
         std::cout << "Tai du lieu that bai. Chuong trinh se khoi dong voi CSDL rong.\n";
         DanhSachDauSach.SoLuong = 0;
         Root = NULL;
     }
-    // 4. Chạy giao diện Menu chính
-    menutui::MenuChinhTUI(DanhSachDauSach, Root);
-    // 5. Lưu dữ liệu trước khi thoát
+    // Chạy giao diện chính
+    giaodien::MenuChinhTUI(DanhSachDauSach, Root);
+    // Lưu dữ liệu trước khi kết thúc chương trình
     if (LuuToanBoDuLieu(DanhSachDauSach, Root)) {
         std::cout << "Da luu du lieu. Tam biet!\n";
     }
     else {
         std::cout << "Luu du lieu that bai!\n";
     }
-    // 6. Dọn dẹp bộ nhớ (Clean up)
+    // Giải phóng toàn bộ vùng nhớ động
     GiaiPhongDanhSachDauSach(DanhSachDauSach);
     GiaiPhongCayDocGia(Root);
     return 0;

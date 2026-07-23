@@ -18,6 +18,18 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="cautruc.h" />
+    <ClInclude Include="dausach.h" />
+    <ClInclude Include="docgia.h" />
+    <ClInclude Include="giaodien.h" />
+    <ClInclude Include="luutru.h" />
+    <ClInclude Include="muontra.h" />
+    <ClInclude Include="thongke.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -138,20 +150,6 @@
       <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="cautruc.h" />
-    <ClInclude Include="dsdausach.h" />
-    <ClInclude Include="dsdms.h" />
-    <ClInclude Include="dsdocgia.h" />
-    <ClInclude Include="dsmuontra.h" />
-    <ClInclude Include="luutru.h" />
-    <ClInclude Include="menu_tui.h" />
-    <ClInclude Include="thongke.h" />
-    <ClInclude Include="tui.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="main.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

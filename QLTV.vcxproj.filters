@@ -15,31 +15,25 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="dausach.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="cautruc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="dsdausach.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="dsdms.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="dsdocgia.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="dsmuontra.h">
+    <ClInclude Include="giaodien.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="luutru.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="menu_tui.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="tui.h">
+    <ClInclude Include="muontra.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="thongke.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="docgia.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
