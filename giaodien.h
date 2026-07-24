@@ -886,24 +886,18 @@ namespace giaodien {
             }
         }
     }
-    // Sắp xếp và hiển thị độc giả theo tên và họ
-    inline void InDocGiaTheoTenHoTUI(DocGiaNode* Root) {
+    // Lập và hiển thị danh sách độc giả theo tên và họ
+    inline void InDocGiaTheoTenHoTUI(DocGiaNode* Root){
         static DocGia* MangDuLieu[MaxDocGia];
         int SoPhanTu = 0;
-        DuyetLNRChuyenThanhMang(Root, MangDuLieu, SoPhanTu);
-        if (SoPhanTu > 0) {
-            QuickSortDocGiaTheoTenHo(MangDuLieu, 0, SoPhanTu - 1);
-        }
+        LapDanhSachDocGiaTheoTenHo(Root, MangDuLieu, SoPhanTu);
         InBangDocGiaTUI(MangDuLieu, SoPhanTu, "QUAN LY DOC GIA  >  IN DANH SACH  (sap theo Ten + Ho)");
     }
-    // Sắp xếp và hiển thị độc giả theo mã thẻ
-    inline void InDocGiaTheoMaTheTUI(DocGiaNode* Root) {
+    // Lập và hiển thị danh sách độc giả theo mã thẻ
+    inline void InDocGiaTheoMaTheTUI(DocGiaNode* Root){
         static DocGia* MangDuLieu[MaxDocGia];
         int SoPhanTu = 0;
-        DuyetLNRChuyenThanhMang(Root, MangDuLieu, SoPhanTu);
-        if (SoPhanTu > 0) {
-            QuickSortDocGiaTheoMaThe(MangDuLieu, 0, SoPhanTu - 1);
-        }
+        LapDanhSachDocGiaTheoMaThe(Root, MangDuLieu, SoPhanTu);
         InBangDocGiaTUI(MangDuLieu, SoPhanTu, "QUAN LY DOC GIA  >  IN DANH SACH  (sap theo Ma the)");
     }
 
@@ -1532,7 +1526,7 @@ namespace giaodien {
                 TenNhap + " | " + TacGiaTam + " | " +
                 std::to_string(DuLieuSach->NamXuatBan) +
                 " | So ban sao: " +
-                std::to_string(DongDaXuLy.SoLuongBanSao);
+                std::to_string(DuLieuSach->SoLuongBanSao);
             if (TongSoDong < MAXLINES) {
                 CacDongKetQua[TongSoDong++] = DongDuLieu;
             }
@@ -1650,15 +1644,18 @@ namespace giaodien {
             CacDongKetQua[TongSoDong++] =
                 FmtLine(std::string("    Tac gia: ") + DuLieuSach->TacGia +
                     " | Nam: " + std::to_string(DuLieuSach->NamXuatBan) + " | The loai: " + DuLieuSach->TheLoai);
-            ThongTinBanSao DanhSachBanSao[5000];
+            const DanhMucSachNode* DanhSachBanSao[5000];
             int SoLuongBanSao = 0;
             LayDanhSachBanSao(DuLieuSach, DanhSachBanSao, SoLuongBanSao, 5000);
             std::string ChiSoHienTai = "    Ma ban sao: ";
             int CountInLine = 0;
             for (int ChiSoBanSao = 0; ChiSoBanSao < SoLuongBanSao; ChiSoBanSao++) {
-                const ThongTinBanSao& BanSao = DanhSachBanSao[ChiSoBanSao];
+                const DanhMucSachNode* BanSao = DanhSachBanSao[ChiSoBanSao];
                 std::string Token =
-                    std::string(BanSao.MaSach) + " (" + TrangThaiStr(BanSao.TrangThai) + ")";
+                    std::string(BanSao->MaSach) +
+                    " (" +
+                    TrangThaiStr(BanSao->TrangThai) +
+                    ")";
                 if ((int)(ChiSoHienTai.size() + Token.size() + 2) > ChieuRong - 8) {
                     if (TongSoDong < 5000) {
                         CacDongKetQua[TongSoDong++] = FmtLine(ChiSoHienTai);
@@ -2163,17 +2160,38 @@ namespace giaodien {
         std::cout << Sep;
         for (int i = 0; i < SoDong; ++i) {
             ThongTinSachDangMuon& KetQuaNhap = DanhSachDong[i];
-            std::string TenCut = KetQuaNhap.TenSach;
+            MuonTraNode* PhieuMuon = KetQuaNhap.PhieuMuon;
+            const DauSach* DuLieuSach = KetQuaNhap.DuLieuSach;
+            std::string TenCut = "";
+            if (DuLieuSach != NULL) {
+                TenCut = DuLieuSach->TenSach;
+            }
             if ((int)TenCut.size() > DoRongCotTEN) {
                 TenCut = TenCut.substr(0, DoRongCotTEN);
             }
+            std::string MaSach = "";
+            std::string ISBN = "";
+            NgayThangNam NgayMuon{ 0, 0, 0 };
+            if (PhieuMuon != NULL) {
+                MaSach = PhieuMuon->MaSach;
+                NgayMuon = PhieuMuon->NgayMuon;
+            }
+            if (DuLieuSach != NULL) {
+                ISBN = DuLieuSach->ISBN;
+            }
             std::string DongDuLieu =
                 CanLeTrai(std::to_string(i + 1), DoRongCotSTT) + " | " +
-                CanLeTrai(KetQuaNhap.MaSach, DoRongCotMS) + " | " +
-                CanLeTrai(KetQuaNhap.ISBN, DoRongCotISBN) + " | " +
+                CanLeTrai(MaSach, DoRongCotMS) + " | " +
+                CanLeTrai(ISBN, DoRongCotISBN) + " | " +
                 CanLeTrai(TenCut, DoRongCotTEN) + " | " +
-                CanLeTrai(ChuyenNgayThanhChuoi(KetQuaNhap.NgayMuon), DoRongCotNGAY) + " | " +
-                CanLeTrai(std::to_string(KetQuaNhap.TongSoNgay), DoRongCotSONG);
+                CanLeTrai(
+                    ChuyenNgayThanhChuoi(NgayMuon),
+                    DoRongCotNGAY
+                ) + " | " +
+                CanLeTrai(
+                    std::to_string(KetQuaNhap.TongSoNgay),
+                    DoRongCotSONG
+                );
             tui::DiChuyenConTro(X0, Y++);
             std::cout << DongDuLieu;
             if (Y > YMax) {
@@ -2221,22 +2239,30 @@ namespace giaodien {
             }
             tui::DiChuyenConTro(4, Y++);
             std::cout << CanLeTrai(std::to_string(i + 1) + ".", DoRongCotSTT) << " | " << CanLeTrai(DuLieuSach->ISBN, DoRongCotISBN)
-                << " | " << CanLeTrai(TenCut, DoRongCotTEN) << " | "
-                << CanLeTrai(std::to_string(DuLieuSach->SoLuotMuon), DoRongCotCNT);
+                << " | " << CanLeTrai(TenCut, DoRongCotTEN) << " | " << CanLeTrai(std::to_string(DuLieuSach->SoLuotMuon), DoRongCotCNT);
         }
         tui::NhanPhimBatKyDeQuayLai(4, FooterY - 1);
     }
     //================= Thống Kê Quá Hạn ===================
-    inline void ThongKeDanhSachQuaHanTUI(const DanhSachDauSach& DanhSachDauSach, DocGiaNode* Root) {
-        const int ChieuRong = 118, ChieuCao = 24, X0 = 4, Y0 = 3;
+    inline void ThongKeDanhSachQuaHanTUI(const DanhSachDauSach& DanhSachDauSach, DocGiaNode* Root){
+        const int ChieuRong = 118;
+        const int ChieuCao = 24;
+        const int X0 = 4;
+        const int Y0 = 3;
         const int FooterY = 1 + ChieuCao - 2;
-        const int DoRongCotSTT = 4, DoRongCotMATHE = 9, DoRongCotMS = 13, DoRongCotTEN = 47, DoRongCotNGAY = 10, DoRongCotTRE = 5;
+        const int DoRongCotSTT = 4;
+        const int DoRongCotMATHE = 9;
+        const int DoRongCotMS = 13;
+        const int DoRongCotTEN = 47;
+        const int DoRongCotNGAY = 10;
+        const int DoRongCotTRE = 5;
         tui::XoaManHinh();
         tui::VeKhung(2, 1, ChieuRong, ChieuCao, "THONG KE > DANH SACH MUON QUA HAN");
         int Y = Y0 + 1;
         tui::DiChuyenConTro(X0, Y);
         std::cout << "Nhap ngay hien tai (dd/mm/yyyy): ";
-        int DateX = X0 + 34, DateY = Y;
+        int DateX = X0 + 34;
+        int DateY = Y;
         Y += 2;
         tui::InHuongDanCuoiTrang(4, FooterY, "[Up/Down] Trang truoc/sau  -  [Esc] Quay lai");
         LamSachBoDemNhap();
@@ -2250,7 +2276,7 @@ namespace giaodien {
             }
             tui::DiChuyenConTro(X0, FooterY - 2);
             std::cout << std::string(90, ' ');
-            NgayHienTai = PhanTichNgayDDMMYYYY(ChuoiNhap);
+            NgayHienTai =  PhanTichNgayDDMMYYYY(ChuoiNhap);
             if (!KiemTraNgayHopLe(NgayHienTai)) {
                 tui::DiChuyenConTro(X0, FooterY - 2);
                 tui::DatMau(tui::MauCanhBao);
@@ -2260,7 +2286,7 @@ namespace giaodien {
                 std::cout << std::string(20, ' ');
                 continue;
             }
-            if (NgayHienTai.Nam < 1500 || NgayHienTai.Nam > NamHienTai) {
+            if (NgayHienTai.Nam < 1500 || NgayHienTai.Nam > NamHienTai){
                 tui::DiChuyenConTro(X0, FooterY - 2);
                 tui::DatMau(tui::MauCanhBao);
                 std::cout << "Loi: Nam khong hop le";
@@ -2271,27 +2297,59 @@ namespace giaodien {
             }
             break;
         }
-        const int MAXROWS = 500;
-        ThongKeQuaHan DanhSachDong[MAXROWS];
-        int TongSoLuong = 0;
-        LapDanhSachQuaHan(Root, DanhSachDauSach, NgayHienTai, DanhSachDong, TongSoLuong, MAXROWS);
+        // Đếm trước để cấp phát đúng số phần tử cần dùng
+        int TongSoLuong = DemSoPhieuQuaHan(Root, NgayHienTai);
+        ThongKeQuaHan* DanhSachDong = NULL;
+        if (TongSoLuong > 0) {
+            // Chỉ cấp phát đúng bằng số phiếu quá hạn
+            DanhSachDong = new ThongKeQuaHan[TongSoLuong];
+            int SoLuongDaLap = 0;
+            LapDanhSachQuaHan(Root, DanhSachDauSach, NgayHienTai, DanhSachDong, SoLuongDaLap, TongSoLuong);
+            TongSoLuong = SoLuongDaLap;
+        }
         const int PAGE = 14;
-        int TongSoTrang = (TongSoLuong == 0 ? 1 : (TongSoLuong + PAGE - 1) / PAGE);
+        int TongSoTrang =(TongSoLuong == 0 ? 1 : (TongSoLuong + PAGE - 1) / PAGE);
         int Trang = 0;
         const int HeaderY = Y0 + 3;
         const int TableY = HeaderY + 2;
         const int DataH = PAGE;
         auto PaintHeader = [&](int TrangHienTai) {
             tui::DiChuyenConTro(X0, Y0 + 1);
-            std::cout << "Nhap ngay hien tai (dd/mm/yyyy): " << ChuyenNgayThanhChuoi(NgayHienTai) << "   (Trang " << (TrangHienTai + 1)
-                << "/" << TongSoTrang << ")" << std::string(10, ' ');
+            std::cout
+                << "Nhap ngay hien tai (dd/mm/yyyy): "
+                << ChuyenNgayThanhChuoi(NgayHienTai)
+                << "   (Trang "
+                << TrangHienTai + 1
+                << "/"
+                << TongSoTrang
+                << ")"
+                << std::string(10, ' ');
             tui::DiChuyenConTro(X0, HeaderY);
-            std::cout << CanLeTrai("STT", DoRongCotSTT) << " | " << CanLeTrai("MaThe", DoRongCotMATHE) << " | "
-                << CanLeTrai("MaSach", DoRongCotMS) << " | " << CanLeTrai("Ten sach", DoRongCotTEN) << " | "
-                << CanLeTrai("Ngay muon", DoRongCotNGAY) << " | " << CanLeTrai("Tre", DoRongCotTRE);
+            std::cout
+                << CanLeTrai("STT", DoRongCotSTT)
+                << " | "
+                << CanLeTrai("MaThe", DoRongCotMATHE)
+                << " | "
+                << CanLeTrai("MaSach", DoRongCotMS)
+                << " | "
+                << CanLeTrai("Ten sach", DoRongCotTEN)
+                << " | "
+                << CanLeTrai("Ngay muon", DoRongCotNGAY)
+                << " | "
+                << CanLeTrai("Tre", DoRongCotTRE);
             tui::DiChuyenConTro(X0, HeaderY + 1);
-            std::cout << TaoDuongKe(DoRongCotSTT) << "-+-" << TaoDuongKe(DoRongCotMATHE) << "-+-" << TaoDuongKe(DoRongCotMS) << "-+-"
-                << TaoDuongKe(DoRongCotTEN) << "-+-" << TaoDuongKe(DoRongCotNGAY) << "-+-" << TaoDuongKe(DoRongCotTRE);
+            std::cout
+                << TaoDuongKe(DoRongCotSTT)
+                << "-+-"
+                << TaoDuongKe(DoRongCotMATHE)
+                << "-+-"
+                << TaoDuongKe(DoRongCotMS)
+                << "-+-"
+                << TaoDuongKe(DoRongCotTEN)
+                << "-+-"
+                << TaoDuongKe(DoRongCotNGAY)
+                << "-+-"
+                << TaoDuongKe(DoRongCotTRE);
             };
         auto PaintPage = [&](int TrangHienTai) {
             PaintHeader(TrangHienTai);
@@ -2304,39 +2362,82 @@ namespace giaodien {
             int ChiSoDauTrang = TrangHienTai * PAGE;
             int ChiSoCuoiTrang = std::min(TongSoLuong, ChiSoDauTrang + PAGE);
             int YOut = TableY;
-            for (int i = ChiSoDauTrang; i < ChiSoCuoiTrang; ++i) {
+            for (int i = ChiSoDauTrang; i < ChiSoCuoiTrang; i++){
                 const ThongKeQuaHan& KetQuaNhap = DanhSachDong[i];
-                std::string TenSachThongKe = KetQuaNhap.TenSach;
-                std::string TenCut =
-                    (int)TenSachThongKe.size() > DoRongCotTEN ? TenSachThongKe.substr(0, DoRongCotTEN) : TenSachThongKe;
+                // Lấy tên sách trực tiếp qua địa chỉ đầu sách
+                std::string TenSachThongKe = "";
+                if (KetQuaNhap.DuLieuSach != NULL) {
+                    TenSachThongKe = KetQuaNhap.DuLieuSach->TenSach;
+                }
+                std::string TenCut =((int)TenSachThongKe.size() > DoRongCotTEN) ? TenSachThongKe.substr(0, DoRongCotTEN): TenSachThongKe;
                 tui::DiChuyenConTro(X0, YOut++);
-                std::cout << CanLeTrai(std::to_string(i + 1), DoRongCotSTT) << " | "
-                    << CanLeTrai(std::to_string(KetQuaNhap.MaThe), DoRongCotMATHE) << " | "
-                    << CanLeTrai(KetQuaNhap.MaSach, DoRongCotMS) << " | " << CanLeTrai(TenCut, DoRongCotTEN) << " | "
-                    << CanLeTrai(ChuyenNgayThanhChuoi(KetQuaNhap.NgayMuon), DoRongCotNGAY) << " | "
-                    << CanLeTrai(std::to_string(KetQuaNhap.SoNgayTre), DoRongCotTRE);
+                std::cout
+                    << CanLeTrai(
+                        std::to_string(i + 1),
+                        DoRongCotSTT
+                    )
+                    << " | "
+                    << CanLeTrai(
+                        std::to_string(
+                            KetQuaNhap
+                            .DuLieuDocGia
+                            ->MaThe
+                        ),
+                        DoRongCotMATHE
+                    )
+                    << " | "
+                    << CanLeTrai(
+                        KetQuaNhap
+                        .PhieuMuon
+                        ->MaSach,
+                        DoRongCotMS
+                    )
+                    << " | "
+                    << CanLeTrai(
+                        TenCut,
+                        DoRongCotTEN
+                    )
+                    << " | "
+                    << CanLeTrai(
+                        ChuyenNgayThanhChuoi(
+                            KetQuaNhap
+                            .PhieuMuon
+                            ->NgayMuon
+                        ),
+                        DoRongCotNGAY
+                    )
+                    << " | "
+                    << CanLeTrai(
+                        std::to_string(
+                            KetQuaNhap.SoNgayTre
+                        ),
+                        DoRongCotTRE
+                    );
             }
             };
         PaintPage(Trang);
         while (true) {
             tui::KeyEvent SuKienPhimMoi = tui::DocPhim();
-            if (SuKienPhimMoi.Phim == tui::PhimEsc) {
+            if (SuKienPhimMoi.Phim == tui::PhimEsc){
+                // Giải phóng đúng mảng đã cấp phát
+                delete[] DanhSachDong;
                 return;
             }
-            if (SuKienPhimMoi.Phim == tui::PhimLen) {
+            if (SuKienPhimMoi.Phim == tui::PhimLen){
                 if (Trang > 0) {
-                    --Trang;
+                    Trang--;
                     PaintPage(Trang);
                 }
             }
-            if (SuKienPhimMoi.Phim == tui::PhimXuong) {
+            if (SuKienPhimMoi.Phim == tui::PhimXuong){
                 if (Trang + 1 < TongSoTrang) {
-                    ++Trang;
+                    Trang++;
                     PaintPage(Trang);
                 }
             }
         }
     }
+
     //==================== Menus ====================//
     //========= Submenu Quản lý độc giả ===========//
     inline void MenuConDocGia(DanhSachDauSach& DanhSachDauSach, DocGiaNode*& Root) {

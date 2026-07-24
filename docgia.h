@@ -4,7 +4,6 @@
 #include <ctime>
 #include "cautruc.h"
 
-
 // =================== CÁC HÀM TÌM KIẾM TRÊN CÂY ===================
 // Tìm độc giả trên cây nhị phân theo mã thẻ
 inline DocGiaNode* TimDocGiaTheoMaThe(DocGiaNode* Root, int MaTheCanXuLy) {
@@ -216,82 +215,78 @@ inline bool CapNhatThongTinDocGia(
     NodeDocGia->ThongTin.TrangThaiThe = TrangThaiMoi;
     return true;
 }
-
-// ===================== CHUYỂN ĐỔI DỮ LIỆU CÂY -> MẢNG ===========================
-inline void DuyetLNRChuyenThanhMang(DocGiaNode* Root, DocGia* MangDuLieu[], int& SoPhanTu) {
-    if (Root == NULL) {
+// ================== CHÈN CÓ THỨ TỰ ĐỘC GIẢ ==================
+// Kiểm tra độc giả thứ nhất có đứng trước độc giả thứ hai theo thứ tự tên, họ và mã thẻ hay không
+inline bool DocGiaDungTruocTheoTenHo(const DocGia* DocGiaThuNhat, const DocGia* DocGiaThuHai){
+    int KetQuaSoSanhTen = std::strcmp(DocGiaThuNhat->Ten, DocGiaThuHai->Ten);
+    if (KetQuaSoSanhTen < 0) {
+        return true;
+    }
+    if (KetQuaSoSanhTen > 0) {
+        return false;
+    }
+    int KetQuaSoSanhHo = std::strcmp(DocGiaThuNhat->Ho, DocGiaThuHai->Ho);
+    if (KetQuaSoSanhHo < 0) {
+        return true;
+    }
+    if (KetQuaSoSanhHo > 0) {
+        return false;
+    }
+    return DocGiaThuNhat->MaThe < DocGiaThuHai->MaThe;
+}
+// Chèn một độc giả vào mảng đang tăng dần theo mã thẻ
+inline void ChenDocGiaTheoMaThe(DocGia* MangDuLieu[], int& SoPhanTu, DocGia* DocGiaCanChen){
+    if (MangDuLieu == NULL || DocGiaCanChen == NULL || SoPhanTu >= MaxDocGia){
         return;
     }
-    DuyetLNRChuyenThanhMang(Root->Left, MangDuLieu, SoPhanTu);
-    if (SoPhanTu < MaxDocGia) {
-        MangDuLieu[SoPhanTu] = &Root->ThongTin;
-        SoPhanTu++;
+    int ViTriChen = SoPhanTu;
+    while (ViTriChen > 0 && DocGiaCanChen->MaThe < MangDuLieu[ViTriChen - 1]->MaThe){
+        MangDuLieu[ViTriChen] = MangDuLieu[ViTriChen - 1];
+        ViTriChen--;
     }
-    DuyetLNRChuyenThanhMang(Root->Right, MangDuLieu, SoPhanTu);
+    MangDuLieu[ViTriChen] = DocGiaCanChen;
+    SoPhanTu++;
 }
-
-// ================== THUẬT TOÁN SẮP XẾP ==================
-// Hoán đổi vị trí của hai con trỏ độc giả
-inline void HoanDoiDocGia(DocGia*& GiaTriThuNhat, DocGia*& GiaTriThuHai) {
-    DocGia* Temp = GiaTriThuNhat;
-    GiaTriThuNhat = GiaTriThuHai;
-    GiaTriThuHai = Temp;
-}
-// --- 1. Sắp xếp Độc giả theo MÃ THẺ (Tăng dần) (Đệ Quy) ---
-// Phân hoạch mảng độc giả theo mã thẻ
-inline int PhanHoachDocGiaTheoMaThe(DocGia* MangDuLieu[], int ChiSoTrai, int ChiSoPhai) {
-    int GiaTriChot = MangDuLieu[ChiSoPhai]->MaThe;
-    int i = ChiSoTrai - 1;
-    for (int j = ChiSoTrai; j < ChiSoPhai; j++) {
-        if (MangDuLieu[j]->MaThe < GiaTriChot) {
-            i++;
-            HoanDoiDocGia(MangDuLieu[i], MangDuLieu[j]);
-        }
+// Chèn một độc giả vào mảng đang tăng dần theo tên, họ và mã thẻ
+inline void ChenDocGiaTheoTenHo(DocGia* MangDuLieu[], int& SoPhanTu, DocGia* DocGiaCanChen){
+    if (MangDuLieu == NULL || DocGiaCanChen == NULL || SoPhanTu >= MaxDocGia){
+        return;
     }
-    HoanDoiDocGia(MangDuLieu[i + 1], MangDuLieu[ChiSoPhai]);
-    return i + 1;
-}
-// Sắp xếp độc giả tăng dần theo mã thẻ
-inline void QuickSortDocGiaTheoMaThe(DocGia* MangDuLieu[], int ChiSoTrai, int ChiSoPhai) {
-    if (ChiSoTrai < ChiSoPhai) {
-        int ViTriPhanHoach = PhanHoachDocGiaTheoMaThe(MangDuLieu, ChiSoTrai, ChiSoPhai);
-        QuickSortDocGiaTheoMaThe(MangDuLieu, ChiSoTrai, ViTriPhanHoach - 1);
-        QuickSortDocGiaTheoMaThe(MangDuLieu, ViTriPhanHoach + 1, ChiSoPhai);
+    int ViTriChen = SoPhanTu;
+    while (ViTriChen > 0 && DocGiaDungTruocTheoTenHo(DocGiaCanChen, MangDuLieu[ViTriChen - 1])){
+        MangDuLieu[ViTriChen] = MangDuLieu[ViTriChen - 1];
+        ViTriChen--;
     }
+    MangDuLieu[ViTriChen] = DocGiaCanChen;
+    SoPhanTu++;
 }
-// --- 2. Sắp xếp Độc giả theo TÊN + HỌ (A -> Z) ---
-// Phân hoạch mảng độc giả theo tên, họ và mã thẻ
-inline int PhanHoachDocGiaTheoTenHo(DocGia* MangDuLieu[], int ChiSoTrai, int ChiSoPhai){
-    DocGia* GiaTriChot = MangDuLieu[ChiSoPhai];
-    int i = ChiSoTrai - 1;
-    for (int j = ChiSoTrai; j < ChiSoPhai; j++) {
-        bool Condition = false;
-        if (std::strcmp(MangDuLieu[j]->Ten, GiaTriChot->Ten) < 0) {
-            Condition = true;
-        }
-        else if (std::strcmp(MangDuLieu[j]->Ten, GiaTriChot->Ten) == 0) {
-            if (std::strcmp(MangDuLieu[j]->Ho, GiaTriChot->Ho) < 0) {
-                Condition = true;
-            }
-            else if (std::strcmp(MangDuLieu[j]->Ho, GiaTriChot->Ho) == 0 && MangDuLieu[j]->MaThe < GiaTriChot->MaThe){
-                Condition = true;
-            }
-        }
-        if (Condition) {
-            i++;
-            HoanDoiDocGia(MangDuLieu[i], MangDuLieu[j]);
-        }
+// Duyệt cây và lần lượt chèn độc giả vào mảng theo mã thẻ tăng dần
+inline void DuyetCayChenDocGiaTheoMaThe(DocGiaNode* Root, DocGia* MangDuLieu[], int& SoPhanTu){
+    if (Root == NULL || SoPhanTu >= MaxDocGia) {
+        return;
     }
-    HoanDoiDocGia(MangDuLieu[i + 1], MangDuLieu[ChiSoPhai]);
-    return i + 1;
+    ChenDocGiaTheoMaThe(MangDuLieu, SoPhanTu, &Root->ThongTin);
+    DuyetCayChenDocGiaTheoMaThe(Root->Left, MangDuLieu, SoPhanTu);
+    DuyetCayChenDocGiaTheoMaThe(Root->Right, MangDuLieu,  SoPhanTu);
 }
-// Sắp xếp độc giả tăng dần theo tên và họ
-inline void QuickSortDocGiaTheoTenHo(DocGia* MangDuLieu[], int ChiSoTrai, int ChiSoPhai) {
-    if (ChiSoTrai < ChiSoPhai) {
-        int ViTriPhanHoach = PhanHoachDocGiaTheoTenHo(MangDuLieu, ChiSoTrai, ChiSoPhai);
-        QuickSortDocGiaTheoTenHo(MangDuLieu, ChiSoTrai, ViTriPhanHoach - 1);
-        QuickSortDocGiaTheoTenHo(MangDuLieu, ViTriPhanHoach + 1, ChiSoPhai);
+// Duyệt cây và lần lượt chèn độc giả vào mảng theo tên, họ và mã thẻ tăng dần
+inline void DuyetCayChenDocGiaTheoTenHo(DocGiaNode* Root, DocGia* MangDuLieu[], int& SoPhanTu){
+    if (Root == NULL || SoPhanTu >= MaxDocGia) {
+        return;
     }
+    ChenDocGiaTheoTenHo(MangDuLieu, SoPhanTu, &Root->ThongTin);
+    DuyetCayChenDocGiaTheoTenHo(Root->Left, MangDuLieu, SoPhanTu);
+    DuyetCayChenDocGiaTheoTenHo(Root->Right, MangDuLieu, SoPhanTu);
+}
+// Lập danh sách độc giả theo mã thẻ bằng thuật toán chèn có thứ tự
+inline void LapDanhSachDocGiaTheoMaThe(DocGiaNode* Root, DocGia* DanhSachKetQua[], int& SoLuongKetQua){
+    SoLuongKetQua = 0;
+    DuyetCayChenDocGiaTheoMaThe(Root, DanhSachKetQua, SoLuongKetQua);
+}
+// Lập danh sách độc giả theo tên và họ bằng thuật toán chèn có thứ tự
+inline void LapDanhSachDocGiaTheoTenHo(DocGiaNode* Root, DocGia* DanhSachKetQua[], int& SoLuongKetQua){
+    SoLuongKetQua = 0;
+    DuyetCayChenDocGiaTheoTenHo(Root, DanhSachKetQua, SoLuongKetQua);
 }
 
 // =================== GIẢI PHÓNG BỘ NHỚ ===================

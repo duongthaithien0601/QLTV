@@ -233,15 +233,7 @@ inline std::string ChuyenNgayThanhChuoi(const NgayThangNam& NgayCanXuLy) {
         return "0/0/0";
     }
     char BoDem[16];
-    std::snprintf(
-        BoDem,
-        sizeof(BoDem),
-        "%02d/%02d/%04d",
-        NgayCanXuLy.Ngay,
-        NgayCanXuLy.Thang,
-        NgayCanXuLy.Nam
-    );
-
+    std::snprintf(BoDem, sizeof(BoDem), "%02d/%02d/%04d", NgayCanXuLy.Ngay, NgayCanXuLy.Thang, NgayCanXuLy.Nam);
     return std::string(BoDem);
 }
 // Chuyển ngày tháng thành số thứ tự để phục vụ so sánh và tính khoảng cách
@@ -260,7 +252,6 @@ inline int TinhSoNgayChenhLech(const NgayThangNam& NgaySau, const NgayThangNam& 
     if (!KiemTraNgayHopLe(NgaySau) || !KiemTraNgayHopLe(NgayTruoc)) {
         return 0;
     }
-
     return ChuyenNgayThanhSoThuTu(NgaySau) - ChuyenNgayThanhSoThuTu(NgayTruoc);
 }
 // Tính số ngày quá hạn dựa trên thời hạn mượn quy định

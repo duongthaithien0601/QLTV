@@ -4,19 +4,15 @@
 #include "dausach.h"
 #include "docgia.h"
 
-
+// ======================= DỮ LIỆU KẾT QUẢ =======================
 struct ThongTinSachDangMuon {
-    char MaSach[MaxMaSach];
-    char ISBN[15];
-    char TenSach[100];
-    NgayThangNam NgayMuon;
+    MuonTraNode* PhieuMuon;
+    const DauSach* DuLieuSach;
     int TongSoNgay;
 
     ThongTinSachDangMuon() {
-        MaSach[0] = '\0';
-        ISBN[0] = '\0';
-        TenSach[0] = '\0';
-        NgayMuon = { 0, 0, 0 };
+        PhieuMuon = NULL;
+        DuLieuSach = NULL;
         TongSoNgay = 0;
     }
 };
@@ -31,7 +27,12 @@ inline const char* LayTenSachTheoISBN(const DanhSachDauSach& DanhSachDauSach, co
     return ConTroHienTai->TenSach;
 }
 // Tạo phiếu mượn trả mới và thêm vào đầu danh sách của độc giả
-inline void ThemPhieuMuonTraChoDocGia(DocGia& DocGiaCanXuLy, const char MaSach[], const NgayThangNam& NgayMuon, const NgayThangNam& NgayTra, int TrangThai) {
+inline void ThemPhieuMuonTraChoDocGia(
+    DocGia& DocGiaCanXuLy,
+    const char MaSach[],
+    const NgayThangNam& NgayMuon,
+    const NgayThangNam& NgayTra,
+    int TrangThai){
     MuonTraNode* NodeCanXuLy = new MuonTraNode();
     SaoChepChuoi(NodeCanXuLy->MaSach, MaxMaSach, MaSach);
     NodeCanXuLy->NgayMuon = NgayMuon;
@@ -260,13 +261,7 @@ inline bool MuonSachTheoMaTheVaISBN(
         }
         return false;
     }
-    return MuonSach(
-        NodeDocGia->ThongTin,
-        *DuLieuSach,
-        NgayMuon,
-        MaSachDaMuon,
-        ThongBaoLoi
-    );
+    return MuonSach(NodeDocGia->ThongTin, *DuLieuSach, NgayMuon, MaSachDaMuon, ThongBaoLoi);
 }
 // Thực hiện trả sách dựa trên mã thẻ và mã sách
 inline bool TraSachTheoMaTheVaMaSach(
@@ -293,15 +288,7 @@ inline bool TraSachTheoMaTheVaMaSach(
         }
         return false;
     }
-    return TraSach(
-        NodeDocGia->ThongTin,
-        DanhSachDauSach,
-        PhieuCanTra,
-        NgayTra,
-        TongSoNgayKetQua,
-        SoNgayTreKetQua,
-        ThongBaoLoi
-    );
+    return TraSach(NodeDocGia->ThongTin, DanhSachDauSach, PhieuCanTra, NgayTra, TongSoNgayKetQua, SoNgayTreKetQua, ThongBaoLoi);
 }
 // Lập danh sách sách đang mượn của độc giả tại ngày kiểm tra
 inline bool LapDanhSachSachDangMuonCuaDocGia(
@@ -349,15 +336,8 @@ inline bool LapDanhSachSachDangMuonCuaDocGia(
         char ISBNCanXuLy[15];
         LayISBNTuMaSach(PhieuMuon->MaSach, ISBNCanXuLy, 15);
         DauSach* DuLieuSach = TimDauSachTheoISBN(DanhSachDauSach, ISBNCanXuLy);
-        SaoChepChuoi(DongKetQua.MaSach, MaxMaSach, PhieuMuon->MaSach);
-        SaoChepChuoi(DongKetQua.ISBN, 15, ISBNCanXuLy);
-        if (DuLieuSach != NULL) {
-            SaoChepChuoi(DongKetQua.TenSach, 100, DuLieuSach->TenSach);
-        }
-        else {
-            DongKetQua.TenSach[0] = '\0';
-        }
-        DongKetQua.NgayMuon = PhieuMuon->NgayMuon;
+        DongKetQua.PhieuMuon = PhieuMuon;
+        DongKetQua.DuLieuSach = DuLieuSach;
         DongKetQua.TongSoNgay = TongSoNgay;
         SoLuongKetQua++;
     }

@@ -6,7 +6,6 @@
 #include "dausach.h"
 #include "docgia.h"
 #include "muontra.h"
-
 #ifdef _WIN32
 #include <direct.h>
 #else
@@ -88,9 +87,8 @@ inline bool LuuDauSach(const DanhSachDauSach& DanhSachDauSach) {
         if (DuLieuSach == NULL) {
             continue;
         }
-        Fo << DuLieuSach->ISBN << "|" << DuLieuSach->TenSach << "|" << DuLieuSach->TacGia << "|" << DuLieuSach->TheLoai
-            << "|" << DuLieuSach->SoTrang << "|" << DuLieuSach->NamXuatBan << "|" << DuLieuSach->SoLuongBanSao << "|"
-            << DuLieuSach->SoLuotMuon << "\n";
+        Fo << DuLieuSach->ISBN << "|" << DuLieuSach->TenSach << "|" << DuLieuSach->TacGia << "|" << DuLieuSach->TheLoai << "|" << DuLieuSach->SoTrang << "|" 
+            << DuLieuSach->NamXuatBan << "|" << DuLieuSach->SoLuongBanSao << "|" << DuLieuSach->SoLuotMuon << "\n";
     }
     return true;
 }
@@ -347,14 +345,11 @@ inline bool DocToanBoDuLieu(DanhSachDauSach& DanhSachDauSach, DocGiaNode*& Root)
     GiaiPhongCayDocGia(Root);
     bool Ok1 = DocDauSach(DanhSachDauSach);
     bool Ok2 = DocDanhMucSach(DanhSachDauSach);
-    for (int i = 0;i < DanhSachDauSach.SoLuong;i++) {
+    for (int i = 0; i < DanhSachDauSach.SoLuong; i++) {
         CapNhatSoLuongBanSao(DanhSachDauSach.Nodes[i]);
     }
     DatLaiTrangThaiTatCaBanSao(DanhSachDauSach);
     bool Ok3 = DocDocGia(Root);
     bool Ok4 = DocMuonTra(DanhSachDauSach, Root);
-    if (DanhSachDauSach.SoLuong > 1) {
-        QuickSortTheoTenSach(DanhSachDauSach.Nodes, 0, DanhSachDauSach.SoLuong - 1);
-    }
     return Ok1 && Ok2 && Ok3 && Ok4;
 }

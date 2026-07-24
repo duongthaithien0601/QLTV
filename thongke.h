@@ -5,131 +5,176 @@
 
 // ======================= DỮ LIỆU THỐNG KÊ =======================
 struct ThongKeQuaHan {
-    int MaThe;
-    char HoTen[100];
-    char MaSach[MaxMaSach];
-    char ISBN[15];
-    char TenSach[100];
-    NgayThangNam NgayMuon;
+    DocGia* DuLieuDocGia;
+    MuonTraNode* PhieuMuon;
+    const DauSach* DuLieuSach;
     int SoNgayTre;
 
     ThongKeQuaHan() {
-        MaThe = 0;
+        DuLieuDocGia = NULL;
+        PhieuMuon = NULL;
+        DuLieuSach = NULL;
         SoNgayTre = 0;
     }
 };
 
 // ======================= TOP 10 SÁCH MƯỢN NHIỀU NHẤT =======================
-inline void ThongKeTop10TheoLuotMuon(const DanhSachDauSach& DanhSachDauSach, DauSach* DanhSachKetQua[], int& SoLuongKetQua) {
-    DauSach* DanhSachTam[MaxDauSach];
-    int SoLuongTam = 0;
-    for (int i = 0; i < DanhSachDauSach.SoLuong; i++) {
+// Kiểm tra đầu sách thứ nhất có đứng trước đầu sách thứ hai trong danh sách Top 10 hay không
+inline bool DauSachDungTruocTrongTop10(const DauSach* DauSachThuNhat, const DauSach* DauSachThuHai){
+    if (DauSachThuNhat->SoLuotMuon > DauSachThuHai->SoLuotMuon){
+        return true;
+    }
+    if (DauSachThuNhat->SoLuotMuon < DauSachThuHai->SoLuotMuon){
+        return false;
+    }
+    int KetQuaSoSanhTen = std::strcmp(DauSachThuNhat->TenSach, DauSachThuHai->TenSach);
+    if (KetQuaSoSanhTen < 0) {
+        return true;
+    }
+    if (KetQuaSoSanhTen > 0) {
+        return false;
+    }
+    return std::strcmp(DauSachThuNhat->ISBN, DauSachThuHai->ISBN) < 0;
+}
+// Chèn địa chỉ một đầu sách vào danh sách Top 10 và chỉ giữ lại tối đa 10 phần tử
+inline void ChenDauSachVaoTop10(DauSach* DanhSachKetQua[], int& SoLuongKetQua, DauSach* DauSachCanChen){
+    if (DanhSachKetQua == NULL || DauSachCanChen == NULL || DauSachCanChen->SoLuotMuon <= 0){
+        return;
+    }
+    int ViTriChen = 0;
+    while (ViTriChen < SoLuongKetQua && !DauSachDungTruocTrongTop10(DauSachCanChen, DanhSachKetQua[ViTriChen])){
+        ViTriChen++;
+    }
+    // Nếu mảng đã đủ 10 phần tử và đầu sách mới (không nằm trong Top 10 thì không chèn)
+    if (ViTriChen >= 10) {
+        return;
+    }
+    int ViTriCuoi = SoLuongKetQua;
+    if (ViTriCuoi >= 10) {
+        ViTriCuoi = 9;
+    }
+    for (int i = ViTriCuoi; i > ViTriChen; i--) {
+        DanhSachKetQua[i] = DanhSachKetQua[i - 1];
+    }
+    DanhSachKetQua[ViTriChen] = DauSachCanChen;
+    if (SoLuongKetQua < 10) {
+        SoLuongKetQua++;
+    }
+}
+// Lập Top 10 bằng cách duy trì trực tiếp một mảng tối đa 10 địa chỉ đầu sách
+inline void ThongKeTop10TheoLuotMuon(const DanhSachDauSach& DanhSachDauSach, DauSach* DanhSachKetQua[], int& SoLuongKetQua){
+    SoLuongKetQua = 0;
+    for (int i = 0; i < DanhSachDauSach.SoLuong;  i++){
         DauSach* DuLieuSach = DanhSachDauSach.Nodes[i];
-        if (DuLieuSach != NULL && DuLieuSach->SoLuotMuon > 0) {
-            DanhSachTam[SoLuongTam] = DuLieuSach;
-            SoLuongTam++;
+        if (DuLieuSach != NULL && DuLieuSach->SoLuotMuon > 0){
+            ChenDauSachVaoTop10(DanhSachKetQua, SoLuongKetQua, DuLieuSach);
         }
-    }
-    for (int i = 0; i < SoLuongTam - 1; i++) {
-        for (int j = i + 1; j < SoLuongTam; j++) {
-            bool CanHoanDoi = false;
-            if (DanhSachTam[j]->SoLuotMuon > DanhSachTam[i]->SoLuotMuon) {
-                CanHoanDoi = true;
-            }
-            else if (DanhSachTam[j]->SoLuotMuon == DanhSachTam[i]->SoLuotMuon) {
-                if (std::strcmp(DanhSachTam[j]->TenSach, DanhSachTam[i]->TenSach) < 0) {
-                    CanHoanDoi = true;
-                }
-            }
-            if (CanHoanDoi) {
-                DauSach* DuLieuTam = DanhSachTam[i];
-                DanhSachTam[i] = DanhSachTam[j];
-                DanhSachTam[j] = DuLieuTam;
-            }
-        }
-    }
-    SoLuongKetQua = SoLuongTam;
-    if (SoLuongKetQua > 10) {
-        SoLuongKetQua = 10;
-    }
-    for (int i = 0; i < SoLuongKetQua; i++) {
-        DanhSachKetQua[i] = DanhSachTam[i];
     }
 }
 
 // =================== THỐNG KÊ ĐỘC GIẢ QUÁ HẠN ===================
-// Duyệt cây độc giả và thu thập các phiếu mượn quá hạn
-inline void DuyetCayThongKeQuaHan(DocGiaNode* Root,
-    const DanhSachDauSach& DanhSachDauSach,
-    const NgayThangNam& NgayHienTai,
+// Đếm chính xác số phiếu đang mượn đã quá hạn
+inline int DemSoPhieuQuaHan(DocGiaNode* Root, const NgayThangNam& NgayHienTai){
+    if (Root == NULL) {
+        return 0;
+    }
+    int SoLuongDem = DemSoPhieuQuaHan(Root->Left, NgayHienTai) + DemSoPhieuQuaHan(Root->Right, NgayHienTai);
+    for (MuonTraNode* ConTroHienTai = Root->ThongTin.MuonTraHead; ConTroHienTai != NULL; ConTroHienTai = ConTroHienTai->Next){
+        if (ConTroHienTai->TrangThai == 0 && TinhSoNgayTre(ConTroHienTai->NgayMuon, NgayHienTai) > 0){
+            SoLuongDem++;
+        }
+    }
+    return SoLuongDem;
+}
+// Kiểm tra dòng quá hạn thứ nhất có đứng trước dòng quá hạn thứ hai hay không
+inline bool ThongKeQuaHanDungTruoc(const ThongKeQuaHan& DongThuNhat, const ThongKeQuaHan& DongThuHai){
+    // Ưu tiên số ngày trễ giảm dần
+    if (DongThuNhat.SoNgayTre > DongThuHai.SoNgayTre){
+        return true;
+    }
+    if (DongThuNhat.SoNgayTre < DongThuHai.SoNgayTre){
+        return false;
+    }
+    // Nếu cùng số ngày trễ thì mã thẻ tăng dần
+    if (
+        DongThuNhat.DuLieuDocGia->MaThe < DongThuHai.DuLieuDocGia->MaThe){
+        return true;
+    }
+    if (DongThuNhat.DuLieuDocGia->MaThe > DongThuHai.DuLieuDocGia->MaThe){
+        return false;
+    }
+    // Nếu cùng mã thẻ thì mã sách tăng dần
+    return std::strcmp(DongThuNhat.PhieuMuon->MaSach, DongThuHai.PhieuMuon->MaSach) < 0;
+}
+// Chèn một dòng quá hạn vào đúng vị trí trong mảng kết quả
+inline void ChenThongKeQuaHanTheoThuTu(
     ThongKeQuaHan DanhSachQuaHan[],
-    int& SoLuongTimThay,
-    int SoDongToiDa) {
-    if (Root == NULL || SoLuongTimThay >= SoDongToiDa) {
+    int& SoLuongKetQua,
+    int SoPhanTuToiDa,
+    DocGia* DuLieuDocGia,
+    MuonTraNode* PhieuMuon,
+    const DauSach* DuLieuSach,
+    int SoNgayTre
+) {
+    if (DanhSachQuaHan == NULL || DuLieuDocGia == NULL || PhieuMuon == NULL || SoLuongKetQua >= SoPhanTuToiDa){
         return;
     }
-    DuyetCayThongKeQuaHan(Root->Left, DanhSachDauSach, NgayHienTai, DanhSachQuaHan, SoLuongTimThay, SoDongToiDa);
-    DocGia* DocGiaCanXuLy = &Root->ThongTin;
-    for (MuonTraNode* ConTroHienTai = DocGiaCanXuLy->MuonTraHead; ConTroHienTai != NULL;
-        ConTroHienTai = ConTroHienTai->Next) {
-        if (ConTroHienTai->TrangThai != 0) {
-            continue;
-        }
-        int Tre = TinhSoNgayTre(ConTroHienTai->NgayMuon, NgayHienTai);
-        if (Tre > 0) {
-            if (SoLuongTimThay >= SoDongToiDa) {
-                return;
-            } // Đầy mảng thì dừng
-            char ISBNCanXuLy[15];
-            LayISBNTuMaSach(ConTroHienTai->MaSach, ISBNCanXuLy, 15);
-            const DauSach* DuLieuSach = TimDauSachTheoISBN(DanhSachDauSach, ISBNCanXuLy);
-            DanhSachQuaHan[SoLuongTimThay].MaThe = DocGiaCanXuLy->MaThe;
-            std::snprintf(DanhSachQuaHan[SoLuongTimThay].HoTen, 100, "%s %s", DocGiaCanXuLy->Ho, DocGiaCanXuLy->Ten);
-            SaoChepChuoi(DanhSachQuaHan[SoLuongTimThay].MaSach, MaxMaSach, ConTroHienTai->MaSach);
-            SaoChepChuoi(DanhSachQuaHan[SoLuongTimThay].ISBN, 15, ISBNCanXuLy);
-            if (DuLieuSach != NULL) {
-                SaoChepChuoi(DanhSachQuaHan[SoLuongTimThay].TenSach, 100, DuLieuSach->TenSach);
-            }
-            else {
-                DanhSachQuaHan[SoLuongTimThay].TenSach[0] = '\0';
-            }
-            DanhSachQuaHan[SoLuongTimThay].NgayMuon = ConTroHienTai->NgayMuon;
-            DanhSachQuaHan[SoLuongTimThay].SoNgayTre = Tre;
-            SoLuongTimThay++; // Tăng biến đếm
-        }
+    ThongKeQuaHan DongCanChen;
+    DongCanChen.DuLieuDocGia = DuLieuDocGia;
+    DongCanChen.PhieuMuon = PhieuMuon;
+    DongCanChen.DuLieuSach = DuLieuSach;
+    DongCanChen.SoNgayTre = SoNgayTre;
+    int ViTriChen = SoLuongKetQua;
+    while (ViTriChen > 0 && ThongKeQuaHanDungTruoc(DongCanChen, DanhSachQuaHan[ViTriChen - 1])){
+        DanhSachQuaHan[ViTriChen] =  DanhSachQuaHan[ViTriChen - 1];
+        ViTriChen--;
     }
-    DuyetCayThongKeQuaHan(Root->Right, DanhSachDauSach, NgayHienTai, DanhSachQuaHan, SoLuongTimThay, SoDongToiDa);
+    DanhSachQuaHan[ViTriChen] = DongCanChen;
+    SoLuongKetQua++;
 }
-// Lập và sắp xếp danh sách độc giả đang mượn sách quá hạn
-inline void LapDanhSachQuaHan(DocGiaNode* Root,
+// Duyệt cây và chèn các phiếu quá hạn vào mảng kết quả
+inline void DuyetCayThongKeQuaHan(
+    DocGiaNode* Root,
     const DanhSachDauSach& DanhSachDauSach,
     const NgayThangNam& NgayHienTai,
     ThongKeQuaHan DanhSachQuaHan[],
     int& SoLuongKetQua,
-    int SoDongToiDa = 500) {
-    SoLuongKetQua = 0;
-    DuyetCayThongKeQuaHan(Root, DanhSachDauSach, NgayHienTai, DanhSachQuaHan, SoLuongKetQua, SoDongToiDa);
-    for (int i = 0; i < SoLuongKetQua - 1; i++) {
-        for (int j = i + 1; j < SoLuongKetQua; j++) {
-            bool Swap = false;
-            if (DanhSachQuaHan[j].SoNgayTre > DanhSachQuaHan[i].SoNgayTre) {
-                Swap = true;
-            }
-            else if (DanhSachQuaHan[j].SoNgayTre == DanhSachQuaHan[i].SoNgayTre) {
-                if (DanhSachQuaHan[j].MaThe < DanhSachQuaHan[i].MaThe) {
-                    Swap = true;
-                }
-                else if (DanhSachQuaHan[j].MaThe == DanhSachQuaHan[i].MaThe) {
-                    if (std::strcmp(DanhSachQuaHan[j].MaSach, DanhSachQuaHan[i].MaSach) < 0) {
-                        Swap = true;
-                    }
-                }
-            }
-            if (Swap) {
-                ThongKeQuaHan DuLieuTam = DanhSachQuaHan[i];
-                DanhSachQuaHan[i] = DanhSachQuaHan[j];
-                DanhSachQuaHan[j] = DuLieuTam;
-            }
-        }
+    int SoPhanTuToiDa
+) {
+    if (Root == NULL || SoLuongKetQua >= SoPhanTuToiDa){
+        return;
     }
+    DuyetCayThongKeQuaHan(Root->Left, DanhSachDauSach, NgayHienTai, DanhSachQuaHan, SoLuongKetQua, SoPhanTuToiDa);
+    DocGia* DuLieuDocGia = &Root->ThongTin;
+    for (MuonTraNode* PhieuMuon = DuLieuDocGia->MuonTraHead; PhieuMuon != NULL; PhieuMuon = PhieuMuon->Next){
+        // Chỉ xét phiếu đang mượn
+        if (PhieuMuon->TrangThai != 0) {
+            continue;
+        }
+        int SoNgayTre = TinhSoNgayTre(PhieuMuon->NgayMuon, NgayHienTai);
+        if (SoNgayTre <= 0) {
+            continue;
+        }
+        char ISBNCanXuLy[15];
+        LayISBNTuMaSach(PhieuMuon->MaSach, ISBNCanXuLy,15);
+        const DauSach* DuLieuSach = TimDauSachTheoISBN(DanhSachDauSach, ISBNCanXuLy);
+        ChenThongKeQuaHanTheoThuTu(DanhSachQuaHan, SoLuongKetQua, SoPhanTuToiDa, DuLieuDocGia, PhieuMuon, DuLieuSach, SoNgayTre);
+    }
+    DuyetCayThongKeQuaHan(Root->Right, DanhSachDauSach, NgayHienTai, DanhSachQuaHan, SoLuongKetQua, SoPhanTuToiDa);
+}
+// Lập danh sách quá hạn theo số ngày trễ giảm dần bằng thuật toán chèn có thứ tự
+inline void LapDanhSachQuaHan(
+    DocGiaNode* Root,
+    const DanhSachDauSach& DanhSachDauSach,
+    const NgayThangNam& NgayHienTai,
+    ThongKeQuaHan DanhSachQuaHan[],
+    int& SoLuongKetQua,
+    int SoPhanTuToiDa
+) {
+    SoLuongKetQua = 0;
+
+    if (DanhSachQuaHan == NULL || SoPhanTuToiDa <= 0){
+        return;
+    }
+    DuyetCayThongKeQuaHan(Root, DanhSachDauSach, NgayHienTai, DanhSachQuaHan, SoLuongKetQua, SoPhanTuToiDa);
 }
