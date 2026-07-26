@@ -6,16 +6,16 @@
 
 // =================== CÁC HÀM TÌM KIẾM TRÊN CÂY ===================
 // Tìm độc giả trên cây nhị phân theo mã thẻ
-inline DocGiaNode* TimDocGiaTheoMaThe(DocGiaNode* Root, int MaTheCanXuLy) {
+inline DocGiaNode* TimDocGiaTheoMaThe(DocGiaNode* Root, int MaTheCanXuLy){
     DocGiaNode* ConTroHienTai = Root;
-    while (ConTroHienTai != NULL) {
-        if (MaTheCanXuLy < ConTroHienTai->ThongTin.MaThe) {
+    while (ConTroHienTai != NULL){
+        if (MaTheCanXuLy < ConTroHienTai->ThongTin.MaThe){
             ConTroHienTai = ConTroHienTai->Left; // Nhỏ hơn -> Sang trái
         }
-        else if (MaTheCanXuLy > ConTroHienTai->ThongTin.MaThe) {
+        else if (MaTheCanXuLy > ConTroHienTai->ThongTin.MaThe){
             ConTroHienTai = ConTroHienTai->Right; // Lớn hơn -> Sang phải
         }
-        else {
+        else{
             return ConTroHienTai; // Tìm thấy
         }
     }
@@ -28,22 +28,22 @@ inline bool KiemTraMaTheTonTai(DocGiaNode* Root, int MaTheCanXuLy) {
 
 // =================== THAY ĐỔI CẤU TRÚC CÂY (THÊM / XÓA NODE) =====================
 // Thêm một độc giả vào cây nhị phân tìm kiếm
-inline void ThemDocGiaVaoCay(DocGiaNode*& Root, const DocGia& GiaTriCanThem) {
+inline void ThemDocGiaVaoCay(DocGiaNode*& Root, const DocGia& GiaTriCanThem){
     if (Root == NULL) {
         Root = new DocGiaNode(GiaTriCanThem);
         return;
     }
     DocGiaNode* ConTroHienTai = Root;
     DocGiaNode* Parent = NULL;
-    while (ConTroHienTai != NULL) {
+    while (ConTroHienTai != NULL){
         Parent = ConTroHienTai;
-        if (GiaTriCanThem.MaThe < ConTroHienTai->ThongTin.MaThe) {
+        if (GiaTriCanThem.MaThe < ConTroHienTai->ThongTin.MaThe){
             ConTroHienTai = ConTroHienTai->Left;
         }
-        else if (GiaTriCanThem.MaThe > ConTroHienTai->ThongTin.MaThe) {
+        else if (GiaTriCanThem.MaThe > ConTroHienTai->ThongTin.MaThe){
             ConTroHienTai = ConTroHienTai->Right;
         }
-        else {
+        else{
             return;
         }
     }
@@ -154,8 +154,7 @@ inline int DemTongDocGia(DocGiaNode* Root) {
 // =================== NGHIỆP VỤ THÊM / CẬP NHẬT ĐỘC GIẢ ===================
 // Kiểm tra dữ liệu và thêm độc giả mới vào cây
 inline bool ThemDocGia(
-    DocGiaNode*& Root,
-    int MaTheCanXuLy,
+    DocGiaNode*& Root, int MaTheCanXuLy, 
     const std::string& HoNhap,
     const std::string& TenNhap,
     const std::string& PhaiNhap,
@@ -185,8 +184,7 @@ inline bool ThemDocGia(
 }
 // Cập nhật thông tin của độc giả theo mã thẻ
 inline bool CapNhatThongTinDocGia(
-    DocGiaNode* Root,
-    int MaTheCanXuLy,
+    DocGiaNode* Root, int MaTheCanXuLy, 
     const std::string& HoMoi,
     const std::string& TenMoi,
     const std::string& PhaiMoi,
@@ -290,8 +288,8 @@ inline void LapDanhSachDocGiaTheoTenHo(DocGiaNode* Root, DocGia* DanhSachKetQua[
 }
 
 // =================== GIẢI PHÓNG BỘ NHỚ ===================
-inline void GiaiPhongCayDocGia(DocGiaNode*& Root) {
-    if (Root == NULL) {
+inline void GiaiPhongCayDocGia(DocGiaNode*& Root){
+    if (Root == NULL){
         return;
     }
     GiaiPhongCayDocGia(Root->Left);

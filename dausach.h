@@ -31,10 +31,11 @@ inline void LayISBNTuMaSach(const char MaSach[], char ISBNKetQua[], int KichThuo
     ISBNKetQua[i] = '\0';
 }
 // Tạo mã sách từ ISBN và số thứ tự bản sao
-inline std::string TaoMaSach(const std::string& ISBNCanXuLy, int ChiSo) {
-    std::ostringstream Oss;
-    Oss << CatKhoangTrangHaiDau(ISBNCanXuLy) << "-" << ChiSo;
-    return Oss.str();
+inline void TaoMaSach(const char ISBNCanXuLy[], int ChiSo, char MaSachKetQua[], int KichThuoc) {
+    if (ISBNCanXuLy == NULL || MaSachKetQua == NULL || KichThuoc <= 0) {
+        return;
+    }
+    std::snprintf(MaSachKetQua, static_cast<size_t>(KichThuoc), "%s-%d", ISBNCanXuLy, ChiSo);
 }
 // Tìm đầu sách trong danh sách theo ISBN
 inline DauSach* TimDauSachTheoISBN(const DanhSachDauSach& DuLieuSach, const char ISBNCanXuLy[]) {
@@ -213,12 +214,10 @@ inline void DatLaiTrangThaiTatCaBanSao(DanhSachDauSach& DanhSachDauSach) {
         }
     }
 }
-
-// ======================= NGHIỆP VỤ ĐẦU SÁCH =======================
+// Tự động tạo bản sao cho các đầu sách trong danh sách
 inline void TaoBanSaoTuDong(DauSach* DuLieuSach, int SoLuongCanXuLy);
+// Tự động xóa bản sao từ cuối danh sách cho các đầu sách trong danh sách
 inline bool GiamBanSaoTuCuoi(DauSach* DuLieuSach, int SoLuongCanXoa);
-
-// ==================== CÁC HÀM KIỂM TRA & TÌM KIẾM CƠ BẢN ======================
 // Kiểm tra danh sách đầu sách đã đạt số lượng tối đa hay chưa
 inline bool KiemTraDanhSachDauSachDay(const DanhSachDauSach& DuLieuSach) {
     return DuLieuSach.SoLuong >= MaxDauSach;
@@ -227,8 +226,6 @@ inline bool KiemTraDanhSachDauSachDay(const DanhSachDauSach& DuLieuSach) {
 inline bool KiemTraISBNTonTai(const DanhSachDauSach& DuLieuSach, const std::string& ISBNCanXuLy) {
     return TimDauSachTheoISBN(DuLieuSach, ISBNCanXuLy.c_str()) != NULL;
 }
-
-// ================== NGHIỆP VỤ XỬ LÝ ISBN ====================
 // Tạo ISBN ngẫu nhiên và bảo đảm không trùng với ISBN đã có
 inline std::string TaoISBNKhongTrung(const DanhSachDauSach& DanhSachDauSach) {
     static std::mt19937 Rng(static_cast<unsigned int>(std::time(NULL)));
@@ -403,11 +400,7 @@ inline void TaoBanSaoTuDong(DauSach* DuLieuSach, int SoLuongCanXuLy) {
     int ChiSoBatDau = DuLieuSach->SoLuongBanSao + 1;
     for (int i = 0; i < SoLuongCanXuLy; i++) {
         DanhMucSachNode* NodeCanXuLy = new DanhMucSachNode();
-        SaoChepChuoi(
-            NodeCanXuLy->MaSach,
-            MaxMaSach,
-            TaoMaSach(DuLieuSach->ISBN, ChiSoBatDau + i)
-        );
+        TaoMaSach(DuLieuSach->ISBN, ChiSoBatDau + i, NodeCanXuLy->MaSach, MaxMaSach);
         NodeCanXuLy->TrangThai = 0;
         ThemSachVaoCuoiDanhMuc(DuLieuSach, NodeCanXuLy);
     }
@@ -531,7 +524,7 @@ inline bool CapNhatThongTinDauSach(
     if (SoTrangMoi != 0) {
         DuLieuSach->SoTrang = SoTrangMoi;
     }
-    // Nếu tên sách thay đổi thì tách khỏi vị trí cũ rồi chèn lại bằng Insert Order
+    // Nếu tên sách thay đổi thì tách khỏi vị trí cũ rồi chèn lại 
     if (CoThayDoiTen) {
         if (!TachDauSachKhoiMang(DanhSachDauSach, DuLieuSach)){
             if (ThongBaoLoi != NULL) {
@@ -577,8 +570,7 @@ inline void GiaiPhongDanhSachDauSach(DanhSachDauSach& DuLieuSach) {
 }
 
 // ================ CHÈN CÓ THỨ TỰ THEO THỂ LOẠI VÀ TÊN SÁCH ==================
-// Kiểm tra đầu sách thứ nhất có đứng trước đầu sách thứ hai
-// theo thứ tự thể loại và tên sách hay không
+// Kiểm tra đầu sách thứ nhất có đứng trước đầu sách thứ hai theo thứ tự thể loại và tên sách hay không
 inline bool DauSachDungTruocTheoTheLoaiVaTen(const DauSach* DauSachThuNhat, const DauSach* DauSachThuHai){
     int KetQuaSoSanhTheLoai = std::strcmp(DauSachThuNhat->TheLoai, DauSachThuHai->TheLoai);
     if (KetQuaSoSanhTheLoai < 0) {
@@ -596,8 +588,7 @@ inline bool DauSachDungTruocTheoTheLoaiVaTen(const DauSach* DauSachThuNhat, cons
     }
     return std::strcmp(DauSachThuNhat->ISBN, DauSachThuHai->ISBN) < 0;
 }
-// Chèn một đầu sách vào mảng đang tăng dần
-// theo thể loại và tên sách
+// Chèn một đầu sách vào mảng đang tăng dần theo thể loại và tên sách
 inline void ChenDauSachTheoTheLoaiVaTen(DauSach* DanhSachDich[], int& SoPhanTu, DauSach* DauSachCanChen){
     if (DanhSachDich == NULL || DauSachCanChen == NULL || SoPhanTu >= MaxDauSach){
         return;
@@ -610,8 +601,7 @@ inline void ChenDauSachTheoTheLoaiVaTen(DauSach* DanhSachDich[], int& SoPhanTu, 
     DanhSachDich[ViTriChen] = DauSachCanChen;
     SoPhanTu++;
 }
-// Lập danh sách đầu sách bằng cách lần lượt
-// chèn từng đầu sách vào đúng vị trí
+// Lập danh sách đầu sách bằng cách lần lượt chèn từng đầu sách vào đúng vị trí
 inline void LayDanhSachSapXepTheoTheLoai(const DanhSachDauSach& DanhSachNguon, DauSach* DanhSachDich[], int& SoPhanTu){
     SoPhanTu = 0;
     if (DanhSachDich == NULL) {

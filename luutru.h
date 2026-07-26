@@ -87,8 +87,8 @@ inline bool LuuDauSach(const DanhSachDauSach& DanhSachDauSach) {
         if (DuLieuSach == NULL) {
             continue;
         }
-        Fo << DuLieuSach->ISBN << "|" << DuLieuSach->TenSach << "|" << DuLieuSach->TacGia << "|" << DuLieuSach->TheLoai << "|" << DuLieuSach->SoTrang << "|" 
-            << DuLieuSach->NamXuatBan << "|" << DuLieuSach->SoLuongBanSao << "|" << DuLieuSach->SoLuotMuon << "\n";
+        Fo << DuLieuSach->ISBN << "|" << DuLieuSach->TenSach << "|" << DuLieuSach->TacGia << "|" << DuLieuSach->TheLoai << "|" 
+            << DuLieuSach->SoTrang << "|" << DuLieuSach->NamXuatBan << "|" << DuLieuSach->SoLuongBanSao << "|" << DuLieuSach->SoLuotMuon << "\n";
     }
     return true;
 }
@@ -255,9 +255,7 @@ inline void DuyetCayLuuMuonTra(std::ofstream& Fo, DocGiaNode* Root) {
         Fo
             << DocGiaCanXuLy.MaThe << "|"
             << ConTroHienTai->MaSach << "|"
-            << ChuyenNgayThanhChuoi(
-                ConTroHienTai->NgayMuon
-            )
+            << ChuyenNgayThanhChuoi(ConTroHienTai->NgayMuon)
             << "|"
             << ChuyenNgayThanhChuoi(
                 ConTroHienTai->NgayTra
@@ -265,8 +263,7 @@ inline void DuyetCayLuuMuonTra(std::ofstream& Fo, DocGiaNode* Root) {
             << "|"
             << ConTroHienTai->TrangThai
             << "\n";
-        ConTroHienTai =
-            ConTroHienTai->Next;
+        ConTroHienTai = ConTroHienTai->Next;
     }
     DuyetCayLuuMuonTra(Fo, Root->Right);
 }
@@ -324,6 +321,9 @@ inline bool DocMuonTra(
         DanhMucSachNode* BanSaoSach = NULL;
         if (DuLieuSach != NULL) {
             BanSaoSach = TimSachTheoMaSach(DuLieuSach, MaSach.c_str());
+        }
+        if (TrangThaiTam == 0 && BanSaoSach != NULL) {
+            DanhDauSachDaMuon(BanSaoSach);
         }
         ThemPhieuMuonTraChoDocGia(DgNode->ThongTin, MaSach.c_str(), NgayMuon, NgayTra, TrangThaiTam);
     }
