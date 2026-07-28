@@ -143,13 +143,6 @@ inline int TaoMaTheKhongTrung(DocGiaNode* Root) {
         }
     }
 }
-// Đếm tổng số độc giả trên cây
-inline int DemTongDocGia(DocGiaNode* Root) {
-    if (Root == NULL) {
-        return 0;
-    }
-    return 1 + DemTongDocGia(Root->Left) + DemTongDocGia(Root->Right);
-}
 
 // =================== NGHIỆP VỤ THÊM / CẬP NHẬT ĐỘC GIẢ ===================
 // Kiểm tra dữ liệu và thêm độc giả mới vào cây
@@ -164,12 +157,9 @@ inline bool ThemDocGia(
     std::string HoDaChuanHoa = ChuanHoaChuoi(HoNhap);
     std::string TenDaChuanHoa = ChuanHoaChuoi(TenNhap);
     if (MaTheCanXuLy <= 0 || KiemTraMaTheTonTai(Root, MaTheCanXuLy)) {
-        if (ThongBaoLoi != NULL) {
-            *ThongBaoLoi = "Ma the khong hop le hoac da ton tai.";
-        }
         return false;
     }
-    if (!KiemTraThongTinDocGiaNhap(HoDaChuanHoa, TenDaChuanHoa, PhaiNhap, TrangThaiNhap, ThongBaoLoi)){
+    if (!KiemTraThongTinDocGiaNhap(HoDaChuanHoa, TenDaChuanHoa, PhaiNhap, TrangThaiNhap)){
         return false;
     }
     DocGia DocGiaCanThem;
@@ -193,9 +183,6 @@ inline bool CapNhatThongTinDocGia(
 ) {
     DocGiaNode* NodeDocGia = TimDocGiaTheoMaThe(Root, MaTheCanXuLy);
     if (NodeDocGia == NULL) {
-        if (ThongBaoLoi != NULL) {
-            *ThongBaoLoi = "Khong tim thay doc gia.";
-        }
         return false;
     }
     std::string HoDaChuanHoa = ChuanHoaChuoi(HoMoi);

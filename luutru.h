@@ -116,7 +116,7 @@ inline bool DocDauSach(DanhSachDauSach& DanhSachDauSach) {
         SaoChepChuoi(DuLieuSach->TheLoai, 40, CacCot[3]);
         DuLieuSach->SoTrang = std::atoi(CacCot[4].c_str());
         DuLieuSach->NamXuatBan = std::atoi(CacCot[5].c_str());
-        DuLieuSach->SoLuongBanSao = std::atoi(CacCot[6].c_str());
+        DuLieuSach->SoLuongBanSao = 0;
         DuLieuSach->SoLuotMuon = std::atoi(CacCot[7].c_str());
         DuLieuSach->DanhMucSachHead = NULL;
         if (!KiemTraDanhSachDauSachDay(DanhSachDauSach)) {
@@ -253,15 +253,8 @@ inline void DuyetCayLuuMuonTra(std::ofstream& Fo, DocGiaNode* Root) {
     MuonTraNode* ConTroHienTai = DocGiaCanXuLy.MuonTraHead;
     while (ConTroHienTai != NULL) {
         Fo
-            << DocGiaCanXuLy.MaThe << "|"
-            << ConTroHienTai->MaSach << "|"
-            << ChuyenNgayThanhChuoi(ConTroHienTai->NgayMuon)
-            << "|"
-            << ChuyenNgayThanhChuoi(
-                ConTroHienTai->NgayTra
-            )
-            << "|"
-            << ConTroHienTai->TrangThai
+            << DocGiaCanXuLy.MaThe << "|" << ConTroHienTai->MaSach << "|" << ChuyenNgayThanhChuoi(ConTroHienTai->NgayMuon) << "|"
+            << ChuyenNgayThanhChuoi(ConTroHienTai->NgayTra) << "|" << ConTroHienTai->TrangThai
             << "\n";
         ConTroHienTai = ConTroHienTai->Next;
     }
@@ -345,9 +338,6 @@ inline bool DocToanBoDuLieu(DanhSachDauSach& DanhSachDauSach, DocGiaNode*& Root)
     GiaiPhongCayDocGia(Root);
     bool Ok1 = DocDauSach(DanhSachDauSach);
     bool Ok2 = DocDanhMucSach(DanhSachDauSach);
-    for (int i = 0; i < DanhSachDauSach.SoLuong; i++) {
-        CapNhatSoLuongBanSao(DanhSachDauSach.Nodes[i]);
-    }
     DatLaiTrangThaiTatCaBanSao(DanhSachDauSach);
     bool Ok3 = DocDocGia(Root);
     bool Ok4 = DocMuonTra(DanhSachDauSach, Root);

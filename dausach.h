@@ -37,7 +37,7 @@ inline void TaoMaSach(const char ISBNCanXuLy[], int ChiSo, char MaSachKetQua[], 
     }
     std::snprintf(MaSachKetQua, static_cast<size_t>(KichThuoc), "%s-%d", ISBNCanXuLy, ChiSo);
 }
-// Tìm đầu sách trong danh sách theo ISBN
+// Tìm và trả về địa chỉ đầu sách có ISBN tương ứng
 inline DauSach* TimDauSachTheoISBN(const DanhSachDauSach& DuLieuSach, const char ISBNCanXuLy[]) {
     if (ISBNCanXuLy == NULL) {
         return NULL;
@@ -122,40 +122,17 @@ inline void ThemSachVaoCuoiDanhMuc(DauSach* DuLieuSach, DanhMucSachNode* NodeCan
     }
     DuLieuSach->SoLuongBanSao++;
 }
-// Tách một bản sao ra khỏi danh mục sách
-inline bool TachSachKhoiDanhMuc(DauSach* DuLieuSach, DanhMucSachNode* DoiTuongCanXuLy) {
-    if (DuLieuSach == NULL || DoiTuongCanXuLy == NULL) {
-        return false;
-    }
-    DanhMucSachNode* ChiSoTruoc = NULL;
-    DanhMucSachNode* ConTroHienTai = DuLieuSach->DanhMucSachHead;
-    while (ConTroHienTai != NULL) {
-        if (ConTroHienTai == DoiTuongCanXuLy) {
-            if (ChiSoTruoc == NULL) {
-                DuLieuSach->DanhMucSachHead = ConTroHienTai->Next;
-            }
-            else {
-                ChiSoTruoc->Next = ConTroHienTai->Next;
-            }
-            DuLieuSach->SoLuongBanSao--;
-            return true;
-        }
-        ChiSoTruoc = ConTroHienTai;
-        ConTroHienTai = ConTroHienTai->Next;
-    }
-    return false;
-}
 // Giải phóng toàn bộ danh sách liên kết các bản sao
 inline void GiaiPhongDanhMucSach(DanhMucSachNode*& Head) {
     DanhMucSachNode* ConTroHienTai = Head;
     while (ConTroHienTai != NULL) {
-        DanhMucSachNode* Nxt = ConTroHienTai->Next;
+        DanhMucSachNode* NodeTiepTheo = ConTroHienTai->Next;
         delete ConTroHienTai;
-        ConTroHienTai = Nxt;
+        ConTroHienTai = NodeTiepTheo;
     }
     Head = NULL;
 }
-// Lấy thông tin các bản sao để phục vụ hiển thị
+// Lấy địa chỉ các bản sao vào mảng để phục vụ hiển thị
 inline void LayDanhSachBanSao(const DauSach* DuLieuSach, const DanhMucSachNode* DanhSachKetQua[], int& SoLuongKetQua, int SoPhanTuToiDa = 5000){
     SoLuongKetQua = 0;
     if (DuLieuSach == NULL || DanhSachKetQua == NULL || SoPhanTuToiDa <= 0) {
@@ -164,7 +141,7 @@ inline void LayDanhSachBanSao(const DauSach* DuLieuSach, const DanhMucSachNode* 
     for (
         const DanhMucSachNode* ConTroHienTai = DuLieuSach->DanhMucSachHead;
         ConTroHienTai != NULL && SoLuongKetQua < SoPhanTuToiDa;
-        ConTroHienTai = ConTroHienTai->Next){
+        ConTroHienTai = ConTroHienTai->Next) {
         DanhSachKetQua[SoLuongKetQua] = ConTroHienTai;
         SoLuongKetQua++;
     }
@@ -195,13 +172,6 @@ inline bool DanhDauSachDaTra(DanhMucSachNode* NodeCanXuLy) {
 }
 
 // =================== KHÁC ===================
-// Đồng bộ số lượng bản sao theo số node thực tế trong danh mục
-inline void CapNhatSoLuongBanSao(DauSach* DuLieuSach) {
-    if (DuLieuSach == NULL) {
-        return;
-    }
-    DuLieuSach->SoLuongBanSao = DemTongSoBanSao(DuLieuSach);
-}
 // Đặt tất cả bản sao về trạng thái có thể cho mượn
 inline void DatLaiTrangThaiTatCaBanSao(DanhSachDauSach& DanhSachDauSach) {
     for (int i = 0;i < DanhSachDauSach.SoLuong;i++) {
@@ -222,10 +192,6 @@ inline bool GiamBanSaoTuCuoi(DauSach* DuLieuSach, int SoLuongCanXoa);
 inline bool KiemTraDanhSachDauSachDay(const DanhSachDauSach& DuLieuSach) {
     return DuLieuSach.SoLuong >= MaxDauSach;
 }
-// Kiểm tra ISBN đã tồn tại trong danh sách đầu sách hay chưa
-inline bool KiemTraISBNTonTai(const DanhSachDauSach& DuLieuSach, const std::string& ISBNCanXuLy) {
-    return TimDauSachTheoISBN(DuLieuSach, ISBNCanXuLy.c_str()) != NULL;
-}
 // Tạo ISBN ngẫu nhiên và bảo đảm không trùng với ISBN đã có
 inline std::string TaoISBNKhongTrung(const DanhSachDauSach& DanhSachDauSach) {
     static std::mt19937 Rng(static_cast<unsigned int>(std::time(NULL)));
@@ -233,7 +199,7 @@ inline std::string TaoISBNKhongTrung(const DanhSachDauSach& DanhSachDauSach) {
     while (true) {
         int GiaTriNgauNhien = Dist(Rng);
         std::string ISBNMoi = std::to_string(GiaTriNgauNhien);
-        if (!KiemTraISBNTonTai(DanhSachDauSach, ISBNMoi)) {
+        if (TimDauSachTheoISBN(DanhSachDauSach, ISBNMoi.c_str()) == NULL) {
             return ISBNMoi;
         }
     }
@@ -260,7 +226,7 @@ inline bool ChenDauSachTheoTen(DanhSachDauSach& DuLieuSach, DauSach* ConTroHienT
     return true;
 }
 // Tách một đầu sách khỏi mảng nhưng không xóa vùng nhớ của đầu sách
-inline bool TachDauSachKhoiMang(DanhSachDauSach& DuLieuSach, DauSach* DauSachCanTach){
+inline bool TachDauSachKhoiMang(DanhSachDauSach& DuLieuSach, DauSach* DauSachCanTach) {
     if (DauSachCanTach == NULL) {
         return false;
     }
@@ -274,7 +240,7 @@ inline bool TachDauSachKhoiMang(DanhSachDauSach& DuLieuSach, DauSach* DauSachCan
     if (ViTriCanTach == -1) {
         return false;
     }
-    for (int i = ViTriCanTach; i < DuLieuSach.SoLuong - 1; i++){
+    for (int i = ViTriCanTach; i < DuLieuSach.SoLuong - 1; i++) {
         DuLieuSach.Nodes[i] = DuLieuSach.Nodes[i + 1];
     }
     DuLieuSach.SoLuong--;
@@ -282,7 +248,7 @@ inline bool TachDauSachKhoiMang(DanhSachDauSach& DuLieuSach, DauSach* DauSachCan
     return true;
 }
 // Xóa đầu sách theo ISBN khi không còn bản sao đang được mượn
-inline bool XoaDauSach(DanhSachDauSach& DuLieuSach, const std::string& ISBNCanXuLy, std::string* ThongBaoLoi = NULL) {
+inline bool XoaDauSach(DanhSachDauSach& DuLieuSach, const std::string& ISBNCanXuLy) {
     int ChiSo = -1;
     for (int i = 0; i < DuLieuSach.SoLuong; i++) {
         if (std::strcmp(DuLieuSach.Nodes[i]->ISBN, ISBNCanXuLy.c_str()) == 0) {
@@ -291,16 +257,10 @@ inline bool XoaDauSach(DanhSachDauSach& DuLieuSach, const std::string& ISBNCanXu
         }
     }
     if (ChiSo == -1) {
-        if (ThongBaoLoi) {
-            *ThongBaoLoi = "Khong tim thay ISBN.";
-        }
         return false;
     }
     DauSach* ConTroHienTai = DuLieuSach.Nodes[ChiSo];
     if (DemSoSachDangMuon(ConTroHienTai) > 0) {
-        if (ThongBaoLoi) {
-            *ThongBaoLoi = "Khong the xoa: dang co doc gia muon.";
-        }
         return false;
     }
     GiaiPhongDanhMucSach(ConTroHienTai->DanhMucSachHead);
@@ -309,6 +269,7 @@ inline bool XoaDauSach(DanhSachDauSach& DuLieuSach, const std::string& ISBNCanXu
         DuLieuSach.Nodes[i] = DuLieuSach.Nodes[i + 1];
     }
     DuLieuSach.SoLuong--;
+    DuLieuSach.Nodes[DuLieuSach.SoLuong] = NULL;
     return true;
 }
 // Tạo đầy đủ dữ liệu đầu sách mới và chèn vào danh sách
@@ -324,15 +285,6 @@ inline bool ThemDauSachMoi(
     std::string* ThongBaoLoi = NULL
 ) {
     if (KiemTraDanhSachDauSachDay(DanhSachDauSach)) {
-        if (ThongBaoLoi != NULL) {
-            *ThongBaoLoi = "Danh sach dau sach da day.";
-        }
-        return false;
-    }
-    if (ISBNCanXuLy.empty() || KiemTraISBNTonTai(DanhSachDauSach, ISBNCanXuLy)) {
-        if (ThongBaoLoi != NULL) {
-            *ThongBaoLoi = "ISBN khong hop le hoac da ton tai.";
-        }
         return false;
     }
     std::string TenDaChuanHoa = ChuanHoaChuoi(TenSachNhap);
@@ -359,16 +311,8 @@ inline bool ThemDauSachMoi(
     DauSachMoi->SoLuongBanSao = 0;
     DauSachMoi->SoLuotMuon = 0;
     DauSachMoi->DanhMucSachHead = NULL;
-
     TaoBanSaoTuDong(DauSachMoi, SoLuongBanSaoNhap);
-    if (!ChenDauSachTheoTen(DanhSachDauSach, DauSachMoi)) {
-        GiaiPhongDanhMucSach(DauSachMoi->DanhMucSachHead);
-        delete DauSachMoi;
-        if (ThongBaoLoi != NULL) {
-            *ThongBaoLoi = "Khong the chen dau sach vao danh sach.";
-        }
-        return false;
-    }
+    ChenDauSachTheoTen(DanhSachDauSach, DauSachMoi);
     return true;
 }
 // Lấy thông tin số bản sao trước khi xác nhận xóa đầu sách
@@ -376,14 +320,10 @@ inline bool LayThongTinDauSachDeXoa(
     const DanhSachDauSach& DanhSachDauSach,
     const std::string& ISBNCanXuLy,
     int& TongSoBanSao,
-    int& SoSachDangMuon,
-    std::string* ThongBaoLoi = NULL
+    int& SoSachDangMuon
 ) {
     DauSach* DuLieuSach = TimDauSachTheoISBN(DanhSachDauSach, ISBNCanXuLy.c_str());
     if (DuLieuSach == NULL) {
-        if (ThongBaoLoi != NULL) {
-            *ThongBaoLoi = "Khong tim thay ISBN.";
-        }
         return false;
     }
     TongSoBanSao = DemTongSoBanSao(DuLieuSach);
@@ -405,7 +345,7 @@ inline void TaoBanSaoTuDong(DauSach* DuLieuSach, int SoLuongCanXuLy) {
         ThemSachVaoCuoiDanhMuc(DuLieuSach, NodeCanXuLy);
     }
 }
-// Giảm số bản sao từ cuối danh mục và bỏ qua sách đang mượn
+// Giảm số bản sao từ cuối 
 inline bool GiamBanSaoTuCuoi(DauSach* DuLieuSach, int SoLuongCanXoa) {
     if (DuLieuSach == NULL || SoLuongCanXoa <= 0) {
         return true;
@@ -439,30 +379,15 @@ inline bool GiamBanSaoTuCuoi(DauSach* DuLieuSach, int SoLuongCanXoa) {
     return (DaXoa == SoLuongCanXoa);
 }
 // Kiểm tra số lượng bản sao mới trước khi cập nhật
-inline bool KiemTraSoLuongBanSaoMoi(
-    const DauSach* DuLieuSach,
-    int SoLuongMoi,
-    std::string* ThongBaoLoi = NULL
-) {
+inline bool KiemTraSoLuongBanSaoMoi(const DauSach* DuLieuSach, int SoLuongMoi) {
     if (DuLieuSach == NULL) {
-        if (ThongBaoLoi != NULL) {
-            *ThongBaoLoi = "Khong tim thay dau sach.";
-        }
         return false;
     }
     if (SoLuongMoi < 1 || SoLuongMoi > 5000) {
-        if (ThongBaoLoi != NULL) {
-            *ThongBaoLoi = "So luong ban sao phai tu 1 den 5000.";
-        }
         return false;
     }
     int SoSachDangMuon = DemSoSachDangMuon(DuLieuSach);
     if (SoLuongMoi < SoSachDangMuon) {
-        if (ThongBaoLoi != NULL) {
-            *ThongBaoLoi = "Khong the giam vi co " +
-                std::to_string(SoSachDangMuon) +
-                " cuon dang duoc muon.";
-        }
         return false;
     }
     return true;
@@ -481,30 +406,23 @@ inline bool CapNhatThongTinDauSach(
 ) {
     DauSach* DuLieuSach = TimDauSachTheoISBN(DanhSachDauSach, ISBNCanXuLy.c_str());
     if (DuLieuSach == NULL) {
-        if (ThongBaoLoi != NULL) {
-            *ThongBaoLoi = "Khong tim thay ISBN.";
-        }
         return false;
     }
     std::string TenDaChuanHoa = ChuanHoaChuoi(TenSachMoi);
     std::string TacGiaDaChuanHoa = ChuanHoaChuoi(TacGiaMoi);
-    if (!KiemTraThongTinDauSachCapNhat(TenSachMoi, TacGiaMoi, NamXuatBanMoi, SoTrangMoi, ThongBaoLoi)){
+    if (!KiemTraThongTinDauSachCapNhat(TenSachMoi, TacGiaMoi, NamXuatBanMoi, SoTrangMoi, ThongBaoLoi)) {
         return false;
     }
-    if (CoThayDoiSoLuong == 1 && !KiemTraSoLuongBanSaoMoi(DuLieuSach, SoLuongBanSaoMoi, ThongBaoLoi)){
+    if (CoThayDoiSoLuong == 1 && !KiemTraSoLuongBanSaoMoi(DuLieuSach, SoLuongBanSaoMoi)) {
         return false;
     }
     // Cập nhật số lượng bản sao trước
-    if (CoThayDoiSoLuong == 1){
-        if (SoLuongBanSaoMoi > DuLieuSach->SoLuongBanSao){
+    if (CoThayDoiSoLuong == 1) {
+        if (SoLuongBanSaoMoi > DuLieuSach->SoLuongBanSao) {
             TaoBanSaoTuDong(DuLieuSach, SoLuongBanSaoMoi - DuLieuSach->SoLuongBanSao);
         }
-        else if (SoLuongBanSaoMoi < DuLieuSach->SoLuongBanSao){
+        else if (SoLuongBanSaoMoi < DuLieuSach->SoLuongBanSao) {
             if (!GiamBanSaoTuCuoi(DuLieuSach, DuLieuSach->SoLuongBanSao - SoLuongBanSaoMoi)){
-                if (ThongBaoLoi != NULL) {
-                    *ThongBaoLoi =
-                        "Khong the giam du so luong ban sao.";
-                }
                 return false;
             }
         }
@@ -513,9 +431,9 @@ inline bool CapNhatThongTinDauSach(
     bool CoThayDoiTen = false;
     if (!TenSachMoi.empty()) {
         CoThayDoiTen = std::strcmp(DuLieuSach->TenSach, TenDaChuanHoa.c_str()) != 0;
-        SaoChepChuoi(DuLieuSach->TenSach, 100,  TenDaChuanHoa);
+        SaoChepChuoi(DuLieuSach->TenSach, 100, TenDaChuanHoa);
     }
-    if (!TacGiaMoi.empty()){
+    if (!TacGiaMoi.empty()) {
         SaoChepChuoi(DuLieuSach->TacGia, 60, TacGiaDaChuanHoa);
     }
     if (NamXuatBanMoi != 0) {
@@ -526,20 +444,8 @@ inline bool CapNhatThongTinDauSach(
     }
     // Nếu tên sách thay đổi thì tách khỏi vị trí cũ rồi chèn lại 
     if (CoThayDoiTen) {
-        if (!TachDauSachKhoiMang(DanhSachDauSach, DuLieuSach)){
-            if (ThongBaoLoi != NULL) {
-                *ThongBaoLoi =
-                    "Khong the tach dau sach khoi vi tri cu.";
-            }
-            return false;
-        }
-        if (!ChenDauSachTheoTen(DanhSachDauSach, DuLieuSach)){
-            if (ThongBaoLoi != NULL) {
-                *ThongBaoLoi =
-                    "Khong the chen lai dau sach theo ten.";
-            }
-            return false;
-        }
+        TachDauSachKhoiMang(DanhSachDauSach, DuLieuSach);
+        ChenDauSachTheoTen(DanhSachDauSach, DuLieuSach);
     }
     return true;
 }
@@ -571,7 +477,7 @@ inline void GiaiPhongDanhSachDauSach(DanhSachDauSach& DuLieuSach) {
 
 // ================ CHÈN CÓ THỨ TỰ THEO THỂ LOẠI VÀ TÊN SÁCH ==================
 // Kiểm tra đầu sách thứ nhất có đứng trước đầu sách thứ hai theo thứ tự thể loại và tên sách hay không
-inline bool DauSachDungTruocTheoTheLoaiVaTen(const DauSach* DauSachThuNhat, const DauSach* DauSachThuHai){
+inline bool DauSachDungTruocTheoTheLoaiVaTen(const DauSach* DauSachThuNhat, const DauSach* DauSachThuHai) {
     int KetQuaSoSanhTheLoai = std::strcmp(DauSachThuNhat->TheLoai, DauSachThuHai->TheLoai);
     if (KetQuaSoSanhTheLoai < 0) {
         return true;
@@ -589,12 +495,12 @@ inline bool DauSachDungTruocTheoTheLoaiVaTen(const DauSach* DauSachThuNhat, cons
     return std::strcmp(DauSachThuNhat->ISBN, DauSachThuHai->ISBN) < 0;
 }
 // Chèn một đầu sách vào mảng đang tăng dần theo thể loại và tên sách
-inline void ChenDauSachTheoTheLoaiVaTen(DauSach* DanhSachDich[], int& SoPhanTu, DauSach* DauSachCanChen){
-    if (DanhSachDich == NULL || DauSachCanChen == NULL || SoPhanTu >= MaxDauSach){
+inline void ChenDauSachTheoTheLoaiVaTen(DauSach* DanhSachDich[], int& SoPhanTu, DauSach* DauSachCanChen) {
+    if (DanhSachDich == NULL || DauSachCanChen == NULL || SoPhanTu >= MaxDauSach) {
         return;
     }
     int ViTriChen = SoPhanTu;
-    while (ViTriChen > 0 && DauSachDungTruocTheoTheLoaiVaTen(DauSachCanChen, DanhSachDich[ViTriChen - 1])){
+    while (ViTriChen > 0 && DauSachDungTruocTheoTheLoaiVaTen(DauSachCanChen, DanhSachDich[ViTriChen - 1])) {
         DanhSachDich[ViTriChen] = DanhSachDich[ViTriChen - 1];
         ViTriChen--;
     }
@@ -602,7 +508,7 @@ inline void ChenDauSachTheoTheLoaiVaTen(DauSach* DanhSachDich[], int& SoPhanTu, 
     SoPhanTu++;
 }
 // Lập danh sách đầu sách bằng cách lần lượt chèn từng đầu sách vào đúng vị trí
-inline void LayDanhSachSapXepTheoTheLoai(const DanhSachDauSach& DanhSachNguon, DauSach* DanhSachDich[], int& SoPhanTu){
+inline void LayDanhSachSapXepTheoTheLoai(const DanhSachDauSach& DanhSachNguon, DauSach* DanhSachDich[], int& SoPhanTu) {
     SoPhanTu = 0;
     if (DanhSachDich == NULL) {
         return;
