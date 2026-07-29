@@ -27,6 +27,7 @@ struct NgayThangNam {
 struct DanhMucSachNode {
     char MaSach[MaxMaSach];
     int TrangThai;
+    char ViTri[20];
 
     DanhMucSachNode* Next;
 
