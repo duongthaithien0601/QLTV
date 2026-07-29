@@ -1865,39 +1865,50 @@ namespace giaodien {
         }
         tui::DiChuyenConTro(X0 + 57, MaY);
         std::cout << "Ten doc gia: " << HoTenDocGia;
-        const int DoRongCotSTT = 4, DoRongCotMS = 13, DoRongCotISBN = 11, DoRongCotTEN = 60, DoRongCotNGAY = 10;
-        int TableY = Y0 + 7;
-        tui::DiChuyenConTro(X0, TableY++);
-        std::cout << CanLeTrai("STT", DoRongCotSTT) << " | " << CanLeTrai("MaSach", DoRongCotMS) << " | " << CanLeTrai("ISBN", DoRongCotISBN)
-            << " | " << CanLeTrai("Ten sach", DoRongCotTEN) << " | " << CanLeTrai("Ngay muon", DoRongCotNGAY);
-        tui::DiChuyenConTro(X0, TableY++);
-        std::cout << TaoDuongKe(DoRongCotSTT) << "-+-" << TaoDuongKe(DoRongCotMS) << "-+-" << TaoDuongKe(DoRongCotISBN) << "-+-"
-            << TaoDuongKe(DoRongCotTEN) << "-+-" << TaoDuongKe(DoRongCotNGAY);
-        MuonTraNode* DanhSachDangMuon[3];
-        int SoLuongDangMuon = 0;
-        LayDanhSachPhieuDangMuon(PNode->ThongTin, DanhSachDangMuon, SoLuongDangMuon);
-        int Stt = 0;
-        for (int i = 0; i < SoLuongDangMuon; i++) {
-            MuonTraNode* PhieuMuonTraHienTai = DanhSachDangMuon[i];
-            char ISBNThuNhat[15];
-            LayISBNTuMaSach(PhieuMuonTraHienTai->MaSach, ISBNThuNhat, 15);
-            std::string Ten0;
-            DauSach* Ds0 = TimDauSachTheoISBN(DanhSachDauSach, ISBNThuNhat);
-            if (Ds0 != NULL) {
-                Ten0 = Ds0->TenSach;
+        const int DoRongCotSTT = 4;
+        const int DoRongCotMS = 13;
+        const int DoRongCotISBN = 11;
+        const int DoRongCotTEN = 60;
+        const int DoRongCotNGAY = 10;
+        const int ViTriBatDauBangY = Y0 + 7;
+        const int ChieuCaoVungBang = FooterY - ViTriBatDauBangY - 2;
+        auto HienThiBangSachDangMuon = [&]() -> int {
+            tui::XoaVung(X0, ViTriBatDauBangY, ChieuRong - 8, ChieuCaoVungBang);
+            int DongBang = ViTriBatDauBangY;
+            tui::DiChuyenConTro(X0, DongBang++);
+            std::cout << CanLeTrai("STT", DoRongCotSTT) << " | " << CanLeTrai("MaSach", DoRongCotMS) << " | " << CanLeTrai("ISBN", DoRongCotISBN)
+                << " | " << CanLeTrai("Ten sach", DoRongCotTEN) << " | " << CanLeTrai("Ngay muon", DoRongCotNGAY);
+            tui::DiChuyenConTro(X0, DongBang++);
+            std::cout << TaoDuongKe(DoRongCotSTT) << "-+-" << TaoDuongKe(DoRongCotMS) << "-+-" << TaoDuongKe(DoRongCotISBN) << "-+-"
+                << TaoDuongKe(DoRongCotTEN) << "-+-" << TaoDuongKe(DoRongCotNGAY);
+            MuonTraNode* DanhSachDangMuon[3];
+            int SoLuongDangMuonHienTai = 0;
+            LayDanhSachPhieuDangMuon(PNode->ThongTin, DanhSachDangMuon, SoLuongDangMuonHienTai);
+            int SoThuTu = 0;
+            for (int i = 0; i < SoLuongDangMuonHienTai; i++) {
+                MuonTraNode* PhieuMuonTraHienTai = DanhSachDangMuon[i];
+                char ISBNThuNhat[15];
+                LayISBNTuMaSach(PhieuMuonTraHienTai->MaSach, ISBNThuNhat, 15);
+                std::string TenSachHienTai = "";
+                DauSach* DauSachHienTai = TimDauSachTheoISBN(DanhSachDauSach, ISBNThuNhat);
+                if (DauSachHienTai != NULL) {
+                    TenSachHienTai = DauSachHienTai->TenSach;
+                }
+                if (DongBang >= FooterY - 3) {
+                    break;
+                }
+                tui::DiChuyenConTro(X0, DongBang++);
+                std::cout << CanLeTrai(std::to_string(++SoThuTu), DoRongCotSTT) << " | " << CanLeTrai(PhieuMuonTraHienTai->MaSach, DoRongCotMS)
+                    << " | " << CanLeTrai(ISBNThuNhat, DoRongCotISBN) << " | " << CanLeTrai(TenSachHienTai, DoRongCotTEN) << " | "
+                    << CanLeTrai(ChuyenNgayThanhChuoi(PhieuMuonTraHienTai->NgayMuon), DoRongCotNGAY);
             }
-            if (TableY >= FooterY - 3) {
-                break;
+            if (SoThuTu == 0) {
+                tui::DiChuyenConTro(X0, DongBang);
+                std::cout << "(Khong co sach dang muon.)";
             }
-            tui::DiChuyenConTro(X0, TableY++);
-            std::cout << CanLeTrai(std::to_string(++Stt), DoRongCotSTT) << " | " << CanLeTrai(PhieuMuonTraHienTai->MaSach, DoRongCotMS)
-                << " | " << CanLeTrai(ISBNThuNhat, DoRongCotISBN) << " | " << CanLeTrai(Ten0, DoRongCotTEN) << " | "
-                << CanLeTrai(ChuyenNgayThanhChuoi(PhieuMuonTraHienTai->NgayMuon), DoRongCotNGAY);
-        }
-        if (Stt == 0) {
-            tui::DiChuyenConTro(X0, TableY++);
-            std::cout << "(Khong co sach dang muon.)";
-        }
+            return SoLuongDangMuonHienTai;
+            };
+        int SoLuongDangMuon = HienThiBangSachDangMuon();
         if (SoLuongDangMuon >= 3) {
             tui::DiChuyenConTro(X0, FooterY - 2);
             tui::DatMau(tui::MauCanhBao);
@@ -1941,9 +1952,6 @@ namespace giaodien {
             tui::DatLaiMau();
             XoaDongTaiViTri(ISBNX, ISBNY, 25);
         }
-        const int ViTriBatDauBangY = Y0 + 7;
-        const int ChieuCaoVungBang = FooterY - ViTriBatDauBangY - 2;
-        tui::XoaVung(X0, ViTriBatDauBangY, ChieuRong - 8, ChieuCaoVungBang);
         NgayThangNam NgayMuon{};
         NgayThangNam NgayHienTai = LayNgayHienTai();
         std::string LuaChonNgayHienTai = "Ngay hien tai (" + ChuyenNgayThanhChuoi(NgayHienTai) + ")";
@@ -2008,10 +2016,13 @@ namespace giaodien {
         if (!MuonSach(PNode->ThongTin, *DauSachCanMuon, NgayMuon, &MaSachDaMuon)){
             return;
         }
+        HienThiBangSachDangMuon();
+        tui::DiChuyenConTro(X0, FooterY - 2);
+        std::cout << std::string(110, ' ');
         tui::DiChuyenConTro(X0, FooterY - 2);
         tui::DatMau(tui::MauThanhCong);
-        std::cout << "Da MUON thanh cong: " << ISBNCanXuLy << " | " << LayTenSachTheoISBN(DanhSachDauSach, ISBNCanXuLy.c_str())
-                  << " | MaSach: " << MaSachDaMuon;
+        std::cout << "Da MUON thanh cong: " << ISBNCanXuLy << " | " << LayTenSachTheoISBN(DanhSachDauSach,ISBNCanXuLy.c_str())
+            << " | MaSach: " << MaSachDaMuon;
         tui::DatLaiMau();
         tui::NhanPhimBatKyDeQuayLai(4, FooterY - 1);
     }
@@ -2202,6 +2213,43 @@ namespace giaodien {
         if (!TraSach(DanhSachDauSach, PhieuCanTra, NgayTra, &TongSoNgay, &SoNgayTre)) {
             return;
         }
+        LayDanhSachPhieuDangMuon(PNode->ThongTin, DanhSachDong, SoDong);
+        const int ViTriBatDauBangY = Y0 + 3;
+        const int ChieuCaoVungBang = 7;
+        tui::XoaVung(X0, ViTriBatDauBangY, ChieuRong - 8, ChieuCaoVungBang);
+        int YCapNhatBang = ViTriBatDauBangY;
+        tui::DiChuyenConTro(X0, YCapNhatBang++);
+        std::cout << "Danh sach DANG MUON:";
+        if (SoDong == 0) {
+            tui::DiChuyenConTro(X0, YCapNhatBang++);
+            std::cout << "(Doc gia khong con sach dang muon.)";
+        }
+        else {
+            tui::DiChuyenConTro(X0, YCapNhatBang++);
+            std::cout << Header;
+            tui::DiChuyenConTro(X0, YCapNhatBang++);
+            std::cout << Sep;
+            for (int i = 0; i < SoDong; i++) {
+                MuonTraNode* PhieuMuonTraHienTai = DanhSachDong[i];
+                char ISBNCanXuLy[15];
+                LayISBNTuMaSach(PhieuMuonTraHienTai->MaSach, ISBNCanXuLy, 15);
+                DauSach* DuLieuSach = TimDauSachTheoISBN(DanhSachDauSach, ISBNCanXuLy);
+                std::string TenSachHienTai = "";
+                if (DuLieuSach != NULL) {
+                    TenSachHienTai = DuLieuSach->TenSach;
+                }
+                if (static_cast<int>(TenSachHienTai.size()) > DoRongCotTEN) {
+                    TenSachHienTai = TenSachHienTai.substr(0, DoRongCotTEN);
+                }
+                std::string DongDuLieu = CanLeTrai(std::to_string(i + 1), DoRongCotSTT) + " | " +
+                    CanLeTrai(PhieuMuonTraHienTai->MaSach, DoRongCotMS) + " | " + CanLeTrai(ISBNCanXuLy, DoRongCotISBN) + " | " +
+                    CanLeTrai(TenSachHienTai, DoRongCotTEN) + " | " + CanLeTrai(ChuyenNgayThanhChuoi(PhieuMuonTraHienTai->NgayMuon), DoRongCotNGAY);
+                tui::DiChuyenConTro(X0, YCapNhatBang++);
+                std::cout << DongDuLieu;
+            }
+        }
+        tui::DiChuyenConTro(X0, FooterY - 2);
+        std::cout << std::string(110, ' ');
         tui::DiChuyenConTro(X0, FooterY - 2);
         tui::DatMau(tui::MauThanhCong);
         std::cout << "Da TRA sach: " << MaSachCanTra << " | So ngay muon: " << TongSoNgay;
