@@ -16,24 +16,19 @@
 // ========================= ĐƯỜNG DẪN TỆP DỮ LIỆU =========================
 // Trả về đường dẫn thư mục chứa dữ liệu
 inline std::string DuongDanThuMucDuLieu() {
-    return std::string("data");
-}
+    return std::string("data");}
 // Trả về đường dẫn tệp lưu đầu sách
 inline std::string DuongDanTepDauSach() {
-    return DuongDanThuMucDuLieu() + "/dausach.txt";
-}
+    return DuongDanThuMucDuLieu() + "/dausach.txt";}
 // Trả về đường dẫn tệp lưu danh mục sách
 inline std::string DuongDanTepDanhMucSach() {
-    return DuongDanThuMucDuLieu() + "/danhmucsach.txt";
-}
+    return DuongDanThuMucDuLieu() + "/danhmucsach.txt";}
 // Trả về đường dẫn tệp lưu độc giả
 inline std::string DuongDanTepDocGia() {
-    return DuongDanThuMucDuLieu() + "/docgia.txt";
-}
+    return DuongDanThuMucDuLieu() + "/docgia.txt";}
 // Trả về đường dẫn tệp lưu mượn trả
 inline std::string DuongDanTepMuonTra() {
-    return DuongDanThuMucDuLieu() + "/muontra.txt";
-}
+    return DuongDanThuMucDuLieu() + "/muontra.txt";}
 // Tạo thư mục dữ liệu nếu thư mục chưa tồn tại
 inline bool DamBaoThuMucDuLieu() {
 #ifdef _WIN32
@@ -87,8 +82,9 @@ inline bool LuuDauSach(const DanhSachDauSach& DanhSachDauSach) {
         if (DuLieuSach == NULL) {
             continue;
         }
-        Fo << DuLieuSach->ISBN << "|" << DuLieuSach->TenSach << "|" << DuLieuSach->TacGia << "|" << DuLieuSach->TheLoai << "|" 
-            << DuLieuSach->SoTrang << "|" << DuLieuSach->NamXuatBan << "|" << DuLieuSach->SoLuongBanSao << "|" << DuLieuSach->SoLuotMuon << "\n";
+        Fo << DuLieuSach->ISBN << "|" << DuLieuSach->TenSach << "|" << DuLieuSach->TacGia << "|" << DuLieuSach->TheLoai << "|" << DuLieuSach->SoTrang 
+            << "|" << DuLieuSach->NamXuatBan << "|" << DuLieuSach->SoLuongBanSao << "|" << LayKeDauSach(DuLieuSach) << "|" 
+            << DuLieuSach->SoLuotMuon << "\n";
     }
     return true;
 }
@@ -104,9 +100,9 @@ inline bool DocDauSach(DanhSachDauSach& DanhSachDauSach) {
         if (DongDuLieu.empty()) {
             continue;
         }
-        std::string CacCot[8];
-        int SoLuongCot = TachChuoiTheoDauGach(DongDuLieu, CacCot, 8);
-        if (SoLuongCot != 8) {
+        std::string CacCot[9];
+        int SoLuongCot = TachChuoiTheoDauGach(DongDuLieu, CacCot, 9);
+        if (SoLuongCot != 9) {
             continue;
         }
         DauSach* DuLieuSach = new DauSach();
@@ -117,7 +113,7 @@ inline bool DocDauSach(DanhSachDauSach& DanhSachDauSach) {
         DuLieuSach->SoTrang = std::atoi(CacCot[4].c_str());
         DuLieuSach->NamXuatBan = std::atoi(CacCot[5].c_str());
         DuLieuSach->SoLuongBanSao = 0;
-        DuLieuSach->SoLuotMuon = std::atoi(CacCot[7].c_str());
+        DuLieuSach->SoLuotMuon = std::atoi(CacCot[8].c_str());
         DuLieuSach->DanhMucSachHead = NULL;
         if (!KiemTraDanhSachDauSachDay(DanhSachDauSach)) {
             DanhSachDauSach.Nodes[DanhSachDauSach.SoLuong++] = DuLieuSach;
@@ -142,7 +138,7 @@ inline bool LuuDanhMucSach(const DanhSachDauSach& DanhSachDauSach) {
         DanhMucSachNode* ConTroHienTai =
             DuLieuSach->DanhMucSachHead;
         while (ConTroHienTai != NULL) {
-            Fo << DuLieuSach->ISBN << "|" << ConTroHienTai->MaSach << "|" << ConTroHienTai->TrangThai << "\n";
+            Fo << DuLieuSach->ISBN << "|" << ConTroHienTai->MaSach << "|" << ConTroHienTai->TrangThai << "|" << ConTroHienTai->ViTri << "\n";
             ConTroHienTai = ConTroHienTai->Next;
         }
     }
@@ -157,14 +153,18 @@ inline bool DocDanhMucSach(DanhSachDauSach& DanhSachDauSach) {
         if (DongDuLieu.empty()) {
             continue;
         }
-        std::string CacCot[3];
-        int SoLuongCot = TachChuoiTheoDauGach(DongDuLieu, CacCot, 3);
-        if (SoLuongCot != 3) {
+        std::string CacCot[4];
+        int SoLuongCot = TachChuoiTheoDauGach(DongDuLieu, CacCot, 4);
+        if (SoLuongCot != 4) {
             continue;
         }
         std::string ISBNCanXuLy = CacCot[0];
         std::string MaSach = CacCot[1];
         std::string ChuoiTrangThai = CacCot[2];
+        std::string KeDaChuanHoa = ChuanHoaKe(CacCot[3]);
+        if (KeDaChuanHoa.empty()) {
+            continue;
+        }
         DauSach* DuLieuSach = TimDauSachTheoISBN(DanhSachDauSach, ISBNCanXuLy.c_str());
         if (DuLieuSach == NULL) {
             continue;
@@ -173,9 +173,9 @@ inline bool DocDanhMucSach(DanhSachDauSach& DanhSachDauSach) {
         SaoChepChuoi(NodeCanXuLy->MaSach, MaxMaSach, MaSach);
         int TrangThaiTam = std::atoi(ChuoiTrangThai.c_str());
         NodeCanXuLy->TrangThai = (TrangThaiTam == 1 ? 1 : 0);
+        SaoChepChuoi(NodeCanXuLy->ViTri, 20, KeDaChuanHoa);
         ThemSachVaoCuoiDanhMuc(DuLieuSach, NodeCanXuLy);
     }
-
     return true;
 }
 
@@ -188,11 +188,7 @@ inline void LuuDocGiaTheoThuTu(std::ofstream& Fo, DocGiaNode* Root) {
     LuuDocGiaTheoThuTu(Fo, Root->Left);
     const DocGia& DocGiaCanXuLy = Root->ThongTin;
     Fo
-        << DocGiaCanXuLy.MaThe << "|"
-        << DocGiaCanXuLy.Ho << "|"
-        << DocGiaCanXuLy.Ten << "|"
-        << DocGiaCanXuLy.Phai << "|"
-        << DocGiaCanXuLy.TrangThaiThe
+        << DocGiaCanXuLy.MaThe << "|" << DocGiaCanXuLy.Ho << "|" << DocGiaCanXuLy.Ten << "|" << DocGiaCanXuLy.Phai << "|" << DocGiaCanXuLy.TrangThaiThe
         << "\n";
     LuuDocGiaTheoThuTu(Fo, Root->Right);
 }
@@ -254,8 +250,7 @@ inline void DuyetCayLuuMuonTra(std::ofstream& Fo, DocGiaNode* Root) {
     while (ConTroHienTai != NULL) {
         Fo
             << DocGiaCanXuLy.MaThe << "|" << ConTroHienTai->MaSach << "|" << ChuyenNgayThanhChuoi(ConTroHienTai->NgayMuon) << "|"
-            << ChuyenNgayThanhChuoi(ConTroHienTai->NgayTra) << "|" << ConTroHienTai->TrangThai
-            << "\n";
+            << ChuyenNgayThanhChuoi(ConTroHienTai->NgayTra) << "|" << ConTroHienTai->TrangThai << "\n";
         ConTroHienTai = ConTroHienTai->Next;
     }
     DuyetCayLuuMuonTra(Fo, Root->Right);

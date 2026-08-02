@@ -33,6 +33,7 @@ struct DanhMucSachNode {
 
     DanhMucSachNode() {
         TrangThai = 0;
+        ViTri[0] = '\0';
         Next = NULL;
     }
 };
@@ -300,6 +301,22 @@ inline int SoSanhNgay(const NgayThangNam& GiaTriThuNhat, const NgayThangNam& Gia
     return 0;
 }
 // ======================= KIỂM TRA DỮ LIỆU DÙNG CHUNG =======================
+// Kiểm tra kệ chỉ gồm đúng một chữ cái từ A đến Z
+inline bool KiemTraKeHopLe(const std::string& KeNhap) {
+    if (KeNhap.length() != 1) {
+        return false;
+    }
+    char KyTuKe = KeNhap[0];
+    return (KyTuKe >= 'A' && KyTuKe <= 'Z') || (KyTuKe >= 'a' && KyTuKe <= 'z');
+}
+// Chuyển ký tự kệ thành chữ hoa
+inline std::string ChuanHoaKe(const std::string& KeNhap) {
+    if (!KiemTraKeHopLe(KeNhap)) {
+        return "";
+    }
+    char KyTuKe = static_cast<char>(std::toupper(static_cast<unsigned char>(KeNhap[0])));
+    return std::string(1, KyTuKe);
+}
 // Kiểm tra chuỗi tên không chứa chữ số hoặc ký tự đặc biệt
 inline bool KiemTraTenHopLe(const std::string& ChuoiNhap) {
     for (unsigned char KyTuDoc : ChuoiNhap) {
@@ -339,6 +356,7 @@ inline bool KiemTraThongTinDauSachNhap(
     const std::string& TenSach,
     const std::string& TacGia,
     const std::string& TheLoai,
+    const std::string& Ke,
     int SoTrang,
     int NamXuatBan,
     int SoLuongBanSao,
@@ -359,6 +377,12 @@ inline bool KiemTraThongTinDauSachNhap(
     if (TheLoai.empty() || !KiemTraTenHopLe(TheLoai)) {
         if (ThongBaoLoi != NULL) {
             *ThongBaoLoi = "The loai khong hop le.";
+        }
+        return false;
+    }
+    if (!KiemTraKeHopLe(Ke)) {
+        if (ThongBaoLoi != NULL) {
+            *ThongBaoLoi = "Ke chi duoc nhap mot chu cai duy nhat.";
         }
         return false;
     }
@@ -422,6 +446,7 @@ inline bool KiemTraThongTinDauSachCapNhat(
     const std::string& TacGia,
     int NamXuatBan,
     int SoTrang,
+    const std::string& KeMoi,
     std::string* ThongBaoLoi = NULL
 ) {
     if (!TenSach.empty() && ChuanHoaChuoi(TenSach).empty()) {
@@ -445,6 +470,12 @@ inline bool KiemTraThongTinDauSachCapNhat(
     if (SoTrang != 0 && !KiemTraSoTrongKhoang(SoTrang, 1, 5000)) {
         if (ThongBaoLoi != NULL) {
             *ThongBaoLoi = "So trang phai tu 1 den 5000.";
+        }
+        return false;
+    }
+    if (!KeMoi.empty() && !KiemTraKeHopLe(KeMoi)) {
+        if (ThongBaoLoi != NULL) {
+            *ThongBaoLoi = "Ke chi duoc nhap mot chu cai duy nhat.";
         }
         return false;
     }

@@ -4,6 +4,9 @@
 #include "dausach.h"
 #include "docgia.h"
 
+
+
+
 // ======================= DỮ LIỆU KẾT QUẢ =======================
 struct ThongTinSachDangMuon {
     MuonTraNode* PhieuMuon;
@@ -68,6 +71,27 @@ inline MuonTraNode* TimPhieuDangMuonTheoMaSach(DocGia& DocGiaCanXuLy, const char
     }
     return NULL;
 }
+// Kiểm tra độc giả có đang mượn một bản sao thuộc ISBN cần tìm hay không
+inline bool KiemTraDocGiaDangMuonISBN(const DocGia& DocGiaCanXuLy, const char ISBNCanKiemTra[]){
+    if (ISBNCanKiemTra == NULL || ISBNCanKiemTra[0] == '\0'){
+        return false;
+    }
+    for (
+        const MuonTraNode* ConTroHienTai = DocGiaCanXuLy.MuonTraHead;
+        ConTroHienTai != NULL;
+        ConTroHienTai = ConTroHienTai->Next
+        ) {
+        if (ConTroHienTai->TrangThai != 0) {
+            continue;
+        }
+        char ISBNDangMuon[15];
+        LayISBNTuMaSach(ConTroHienTai->MaSach, ISBNDangMuon, 15);
+        if (std::strcmp(ISBNDangMuon, ISBNCanKiemTra) == 0){
+            return true;
+        }
+    }
+    return false;
+}
 // ===================== KIỂM TRA QUÁ HẠN =======================
 inline bool KiemTraDocGiaQuaHanDenNgay(const DocGia& DocGiaCanXuLy, const NgayThangNam& NgayKiemTra, int* KetQuaSoNgayTreLonNhat = NULL) {
     int SoNgayTreLonNhat = 0;
@@ -108,6 +132,9 @@ inline bool MuonSach(
         return false;
     }
     if (DemSoSachDocGiaDangMuon(DocGiaCanXuLy) >= 3) {
+        return false;
+    }
+    if (KiemTraDocGiaDangMuonISBN(DocGiaCanXuLy, DuLieuSach.ISBN)){
         return false;
     }
     int SoNgayTreLonNhat = 0;
