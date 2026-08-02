@@ -133,7 +133,9 @@ inline void GiaiPhongDanhMucSach(DanhMucSachNode*& Head) {
     Head = NULL;
 }
 // Lấy địa chỉ các bản sao vào mảng để phục vụ hiển thị
-inline void LayDanhSachBanSao(const DauSach* DuLieuSach, const DanhMucSachNode* DanhSachKetQua[], int& SoLuongKetQua, int SoPhanTuToiDa = 5000){
+inline void LayDanhSachBanSao(
+    const DauSach* DuLieuSach, const DanhMucSachNode* DanhSachKetQua[], 
+    int& SoLuongKetQua, int SoPhanTuToiDa = 5000){
     SoLuongKetQua = 0;
     if (DuLieuSach == NULL || DanhSachKetQua == NULL || SoPhanTuToiDa <= 0) {
         return;
@@ -270,11 +272,36 @@ inline bool TachDauSachKhoiMang(DanhSachDauSach& DuLieuSach, DauSach* DauSachCan
     DuLieuSach.Nodes[DuLieuSach.SoLuong] = NULL;
     return true;
 }
-// Xóa đầu sách theo ISBN khi không còn bản sao đang được mượn
+// Xóa một bản sao cụ thể theo mã sách
+inline bool XoaBanSaoTheoMaSach(DauSach* DuLieuSach, const std::string& MaSachCanXoa) {
+    if (DuLieuSach == NULL) {
+        return false;
+    }
+    DanhMucSachNode* ConTroTruoc = NULL;
+    DanhMucSachNode* ConTroHienTai = DuLieuSach->DanhMucSachHead;
+    while (ConTroHienTai != NULL && std::strcmp(ConTroHienTai->MaSach, MaSachCanXoa.c_str()) != 0) {
+        ConTroTruoc = ConTroHienTai;
+        ConTroHienTai = ConTroHienTai->Next;
+    }
+    if (ConTroHienTai == NULL || ConTroHienTai->TrangThai == 1) {
+        return false;
+    }
+    if (ConTroTruoc == NULL) {
+        DuLieuSach->DanhMucSachHead = ConTroHienTai->Next;
+    }
+    else {
+        ConTroTruoc->Next = ConTroHienTai->Next;
+    }
+
+    delete ConTroHienTai;
+    DuLieuSach->SoLuongBanSao = DemTongSoBanSao(DuLieuSach);
+    return true;
+}
+// Chỉ xóa ISBN khi đầu sách không còn bất kỳ bản sao nào
 inline bool XoaDauSach(DanhSachDauSach& DuLieuSach, const std::string& ISBNCanXuLy) {
     int ChiSo = -1;
     for (int i = 0; i < DuLieuSach.SoLuong; i++) {
-        if (std::strcmp(DuLieuSach.Nodes[i]->ISBN, ISBNCanXuLy.c_str()) == 0) {
+        if (DuLieuSach.Nodes[i] != NULL && std::strcmp(DuLieuSach.Nodes[i]->ISBN, ISBNCanXuLy.c_str()) == 0) {
             ChiSo = i;
             break;
         }
@@ -282,12 +309,11 @@ inline bool XoaDauSach(DanhSachDauSach& DuLieuSach, const std::string& ISBNCanXu
     if (ChiSo == -1) {
         return false;
     }
-    DauSach* ConTroHienTai = DuLieuSach.Nodes[ChiSo];
-    if (DemSoSachDangMuon(ConTroHienTai) > 0) {
+    DauSach* DauSachCanXoa = DuLieuSach.Nodes[ChiSo];
+    if (DemTongSoBanSao(DauSachCanXoa) > 0) {
         return false;
     }
-    GiaiPhongDanhMucSach(ConTroHienTai->DanhMucSachHead);
-    delete ConTroHienTai;
+    delete DauSachCanXoa;
     for (int i = ChiSo; i < DuLieuSach.SoLuong - 1; i++) {
         DuLieuSach.Nodes[i] = DuLieuSach.Nodes[i + 1];
     }
@@ -329,6 +355,7 @@ inline bool ThemDauSachMoi(
     DauSachMoi->SoTrang = SoTrangNhap;
     DauSachMoi->NamXuatBan = NamXuatBanNhap;
     DauSachMoi->SoLuongBanSao = 0;
+    DauSachMoi->ChiSoBanSaoLonNhat = 0;
     DauSachMoi->SoLuotMuon = 0;
     DauSachMoi->DanhMucSachHead = NULL;
     TaoBanSaoTuDong(DauSachMoi, SoLuongBanSaoNhap, KeDaChuanHoa);
@@ -352,16 +379,16 @@ inline bool LayThongTinDauSachDeXoa(
 }
 
 // ====================== QUẢN LÝ BẢN SAO ======================
-// Tạo thêm các bản sao có mã sách tự động cho đầu sách
-inline void TaoBanSaoTuDong(DauSach* DuLieuSach, int SoLuongCanXuLy, const std::string& KeNhap){
+// Tạo thêm các bản sao theo chỉ số lớn nhất đã từng được sử dụng
+inline void TaoBanSaoTuDong(DauSach* DuLieuSach, int SoLuongCanXuLy, const std::string& KeNhap) {
     std::string KeDaChuanHoa = ChuanHoaKe(KeNhap);
-    if (DuLieuSach == NULL || SoLuongCanXuLy <= 0 || KeDaChuanHoa.empty()){
+    if (DuLieuSach == NULL || SoLuongCanXuLy <= 0 || KeDaChuanHoa.empty()) {
         return;
     }
-    int ChiSoBatDau = DuLieuSach->SoLuongBanSao + 1;
     for (int i = 0; i < SoLuongCanXuLy; i++) {
+        DuLieuSach->ChiSoBanSaoLonNhat++;
         DanhMucSachNode* NodeCanXuLy = new DanhMucSachNode();
-        TaoMaSach(DuLieuSach->ISBN, ChiSoBatDau + i, NodeCanXuLy->MaSach, MaxMaSach);
+        TaoMaSach(DuLieuSach->ISBN, DuLieuSach->ChiSoBanSaoLonNhat, NodeCanXuLy->MaSach, MaxMaSach);
         NodeCanXuLy->TrangThai = 0;
         SaoChepChuoi(NodeCanXuLy->ViTri, 20, KeDaChuanHoa);
         ThemSachVaoCuoiDanhMuc(DuLieuSach, NodeCanXuLy);

@@ -1231,25 +1231,27 @@ namespace giaodien {
     }
     //================ Xóa đầu sách =================//
     inline void FormXoaDauSachTUI(DanhSachDauSach& DanhSachDauSach) {
-        const int ChieuRong = 90, ChieuCao = 16, X0 = 4, Y0 = 3;
+        const int ChieuRong = 100;
+        const int ChieuCao = 22;
+        const int X0 = 4;
+        const int Y0 = 3;
         const int FooterY = 1 + ChieuCao - 2;
         tui::XoaManHinh();
         tui::VeKhung(2, 1, ChieuRong, ChieuCao, "QUAN LY DAU SACH  >  XOA DAU SACH");
         int Y = Y0 + 1;
         tui::DiChuyenConTro(X0, Y);
-        std::cout << "Nhap ISBN: ";
-        int ISBNX = X0 + 12, ISBNY = Y;
-        Y += 1;
+        std::cout << "Nhap ISBN             : ";
+        int ISBNX = X0 + 24;
+        int ISBNY = Y;
         tui::InHuongDanCuoiTrang(4, FooterY, "[Enter] Xac nhan  -  [Esc] Quay lai");
         LamSachBoDemNhap();
         std::string ISBNCanXuLy;
         if (DocDongChoPhepThoatKhiRong(ISBNX, ISBNY, 20, ISBNCanXuLy) == -1) {
             return;
         }
-        int TongSoBanSao = 0;
-        int SoSachDangMuon = 0;
-        std::string ThongBaoLoi;
-        if (!LayThongTinDauSachDeXoa(DanhSachDauSach, ISBNCanXuLy, TongSoBanSao, SoSachDangMuon)) {
+        ISBNCanXuLy = CatKhoangTrangHaiDau(ISBNCanXuLy);
+        DauSach* DuLieuSach = TimDauSachTheoISBN(DanhSachDauSach, ISBNCanXuLy.c_str());
+        if (DuLieuSach == NULL) {
             tui::DiChuyenConTro(X0, FooterY - 2);
             tui::DatMau(tui::MauCanhBao);
             std::cout << "Khong tim thay ISBN.";
@@ -1257,36 +1259,100 @@ namespace giaodien {
             tui::NhanPhimBatKyDeQuayLai(4, FooterY - 1);
             return;
         }
+        int TongSoBanSao = DemTongSoBanSao(DuLieuSach);
+        int SoSachDangMuon = DemSoSachDangMuon(DuLieuSach);
+        Y += 2;
         tui::DiChuyenConTro(X0, Y++);
-        std::cout << "Tong so ban sao : " << TongSoBanSao;
+        std::cout << "Ten sach              : " << DuLieuSach->TenSach;
         tui::DiChuyenConTro(X0, Y++);
-        std::cout << "Dang cho muon   : " << SoSachDangMuon;
-        if (SoSachDangMuon > 0) {
-            tui::DiChuyenConTro(X0, Y + 1);
-            tui::DatMau(tui::MauCanhBao);
-            std::cout << "Khong the xoa: co ban sao dang cho muon.";
+        std::cout << "Tong so ban sao       : " << TongSoBanSao;
+        tui::DiChuyenConTro(X0, Y++);
+        std::cout << "So ban sao dang muon  : " << SoSachDangMuon;
+        // ISBN được giữ lại từ lần xóa bản sao cuối trước đó
+        if (TongSoBanSao == 0) {
+            Y += 2;
+            tui::DiChuyenConTro(X0, Y);
+            std::cout << "ISBN nay hien khong con ban sao. " << "Xoa ISBN: ";
+            int LuaChonXoaISBN = ChonRadioTaiViTri(X0 + 47, Y, { "Co", "Khong" }, 1);
+            if (LuaChonXoaISBN != 0) {
+                tui::DiChuyenConTro(X0, FooterY - 2);
+                std::cout << "Da huy xoa ISBN.";
+                tui::NhanPhimBatKyDeQuayLai(4, FooterY - 1);
+                return;
+            }
+            tui::DiChuyenConTro(X0, FooterY - 2);
+            if (XoaDauSach(DanhSachDauSach, ISBNCanXuLy)) {
+                tui::DatMau(tui::MauThanhCong);
+                std::cout << "Da xoa ISBN.";
+            }
             tui::DatLaiMau();
             tui::NhanPhimBatKyDeQuayLai(4, FooterY - 1);
             return;
         }
-        tui::DiChuyenConTro(X0, Y + 1);
-        std::cout << "Ban co muon xoa dau sach nay khong: ";
-        int LuaChon = ChonRadioTaiViTri(X0 + 39, Y + 1, { "Co", "Khong" }, 1);
-        if (LuaChon != 0) {
-            tui::DiChuyenConTro(X0, Y + 3);
-            std::cout << "Da huy xoa dau sach.";
+        Y += 2;
+        tui::DiChuyenConTro(X0, Y);
+        std::cout << "Nhap ma ban sao can xoa: ";
+        int MaSachX = X0 + 25;
+        int MaSachY = Y;
+        std::string MaSachCanXoa;
+        if (DocDongChoPhepThoatKhiRong(MaSachX, MaSachY, MaxMaSach - 1, MaSachCanXoa) == -1) {
+            return;
+        }
+        MaSachCanXoa = CatKhoangTrangHaiDau(MaSachCanXoa);
+        DanhMucSachNode* BanSaoCanXoa = TimSachTheoMaSach(DuLieuSach, MaSachCanXoa.c_str());
+        if (BanSaoCanXoa == NULL) {
+            tui::DiChuyenConTro(X0, FooterY - 2);
+            tui::DatMau(tui::MauCanhBao);
+            std::cout << "Ma ban sao khong ton tai " << "trong ISBN nay.";
+            tui::DatLaiMau();
             tui::NhanPhimBatKyDeQuayLai(4, FooterY - 1);
             return;
         }
-        ThongBaoLoi.clear();
-        tui::DiChuyenConTro(X0, Y + 3);
-        if (XoaDauSach(DanhSachDauSach, ISBNCanXuLy)) {
+        if (BanSaoCanXoa->TrangThai == 1) {
+            tui::DiChuyenConTro(X0, FooterY - 2);
+            tui::DatMau(tui::MauCanhBao);
+            std::cout << "Khong the xoa: " << "ban sao dang duoc muon.";
+            tui::DatLaiMau();
+            tui::NhanPhimBatKyDeQuayLai(4, FooterY - 1);
+            return;
+        }
+        Y += 2;
+        tui::DiChuyenConTro(X0, Y);
+        std::cout << "Xac nhan xoa ban sao " << MaSachCanXoa << ": ";
+        int LuaChonXoaBanSao = ChonRadioTaiViTri(X0 + 38, Y, { "Co", "Khong" }, 1);
+        if (LuaChonXoaBanSao != 0) {
+            tui::DiChuyenConTro(X0, FooterY - 2);
+            std::cout << "Da huy xoa ban sao.";
+            tui::NhanPhimBatKyDeQuayLai(4, FooterY - 1);
+            return;
+        }
+        bool LaBanSaoCuoiCung = TongSoBanSao == 1;
+        if (!XoaBanSaoTheoMaSach(DuLieuSach, MaSachCanXoa)) {
+            tui::NhanPhimBatKyDeQuayLai(4, FooterY - 1);
+            return;
+        }
+        if (!LaBanSaoCuoiCung) {
+            tui::DiChuyenConTro(X0, FooterY - 2);
             tui::DatMau(tui::MauThanhCong);
-            std::cout << "Da xoa dau sach.";
+            std::cout << "Da xoa ban sao " << MaSachCanXoa << ".";
+            tui::DatLaiMau();
+            tui::NhanPhimBatKyDeQuayLai(4, FooterY - 1);
+            return;
+        }
+        Y += 2;
+        tui::DiChuyenConTro(X0, Y);
+        std::cout << "Da xoa ban sao cuoi. " << "Ban co muon xoa ISBN: ";
+        int LuaChonXoaISBN = ChonRadioTaiViTri(X0 + 47, Y, { "Co", "Khong" }, 1);
+        tui::DiChuyenConTro(X0, FooterY - 2);
+        if (LuaChonXoaISBN == 0) {
+            if (XoaDauSach(DanhSachDauSach, ISBNCanXuLy)) {
+                tui::DatMau(tui::MauThanhCong);
+                std::cout << "Da xoa ban sao cuoi " << "va xoa ISBN.";
+            }
         }
         else {
-            tui::DatMau(tui::MauCanhBao);
-            std::cout << ThongBaoLoi;
+            tui::DatMau(tui::MauThanhCong);
+            std::cout << "Da xoa ban sao cuoi. " << "ISBN van duoc giu lai.";
         }
         tui::DatLaiMau();
         tui::NhanPhimBatKyDeQuayLai(4, FooterY - 1);
@@ -1534,12 +1600,20 @@ namespace giaodien {
             tui::DiChuyenConTro(X0, FooterY - 2);
             std::cout << std::string(90, ' ');
             if (InKe.empty()) {
+                if (DuLieuSach->SoLuongBanSao == 0 && HasSL == 1 && SlTarget > 0) {
+                    tui::DiChuyenConTro(X0, FooterY - 2);
+                    tui::DatMau(tui::MauCanhBao);
+                    std::cout << "ISBN khong con ban sao, bat buoc nhap ke de tao ban sao moi.";
+                    tui::DatLaiMau();
+                    XoaDongTaiViTri(KeX, KeY, 20);
+                    continue;
+                }
                 break;
             }
             if (!KiemTraKeHopLe(InKe)) {
                 tui::DiChuyenConTro(X0, FooterY - 2);
                 tui::DatMau(tui::MauCanhBao);
-                std::cout << "Loi: Ke chi duoc nhap mot chu cai duy nhat.";
+                std::cout << "Loi: Ke chi duoc nhap mot chu cai duy nhat. ";
                 tui::DatLaiMau();
                 XoaDongTaiViTri(KeX, KeY, 20);
                 continue;

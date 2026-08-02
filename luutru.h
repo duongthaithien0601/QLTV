@@ -82,9 +82,9 @@ inline bool LuuDauSach(const DanhSachDauSach& DanhSachDauSach) {
         if (DuLieuSach == NULL) {
             continue;
         }
-        Fo << DuLieuSach->ISBN << "|" << DuLieuSach->TenSach << "|" << DuLieuSach->TacGia << "|" << DuLieuSach->TheLoai << "|" << DuLieuSach->SoTrang 
-            << "|" << DuLieuSach->NamXuatBan << "|" << DuLieuSach->SoLuongBanSao << "|" << LayKeDauSach(DuLieuSach) << "|" 
-            << DuLieuSach->SoLuotMuon << "\n";
+        Fo << DuLieuSach->ISBN << "|" << DuLieuSach->TenSach << "|" << DuLieuSach->TacGia << "|" << DuLieuSach->TheLoai << "|"
+            << DuLieuSach->SoTrang << "|" << DuLieuSach->NamXuatBan << "|" << DuLieuSach->SoLuongBanSao << "|"
+            << LayKeDauSach(DuLieuSach) << "|" << DuLieuSach->SoLuotMuon << "|" << DuLieuSach->ChiSoBanSaoLonNhat << "\n";
     }
     return true;
 }
@@ -100,9 +100,9 @@ inline bool DocDauSach(DanhSachDauSach& DanhSachDauSach) {
         if (DongDuLieu.empty()) {
             continue;
         }
-        std::string CacCot[9];
-        int SoLuongCot = TachChuoiTheoDauGach(DongDuLieu, CacCot, 9);
-        if (SoLuongCot != 9) {
+        std::string CacCot[10];
+        int SoLuongCot = TachChuoiTheoDauGach(DongDuLieu, CacCot, 10);
+        if (SoLuongCot != 10) {
             continue;
         }
         DauSach* DuLieuSach = new DauSach();
@@ -114,9 +114,14 @@ inline bool DocDauSach(DanhSachDauSach& DanhSachDauSach) {
         DuLieuSach->NamXuatBan = std::atoi(CacCot[5].c_str());
         DuLieuSach->SoLuongBanSao = 0;
         DuLieuSach->SoLuotMuon = std::atoi(CacCot[8].c_str());
+        DuLieuSach->ChiSoBanSaoLonNhat = std::atoi(CacCot[9].c_str());
         DuLieuSach->DanhMucSachHead = NULL;
         if (!KiemTraDanhSachDauSachDay(DanhSachDauSach)) {
-            DanhSachDauSach.Nodes[DanhSachDauSach.SoLuong++] = DuLieuSach;
+            DanhSachDauSach.Nodes[DanhSachDauSach.SoLuong] = DuLieuSach;
+            DanhSachDauSach.SoLuong++;
+        }
+        else {
+            delete DuLieuSach;
         }
     }
     return true;

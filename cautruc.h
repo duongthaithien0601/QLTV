@@ -47,6 +47,7 @@ struct DauSach {
     int SoTrang;
     int NamXuatBan;
     int SoLuongBanSao;
+    int ChiSoBanSaoLonNhat;
     int SoLuotMuon;
 
     DanhMucSachNode* DanhMucSachHead;
@@ -55,6 +56,7 @@ struct DauSach {
         SoTrang = 0;
         NamXuatBan = 0;
         SoLuongBanSao = 0;
+        ChiSoBanSaoLonNhat = 0;
         SoLuotMuon = 0;
         DanhMucSachHead = NULL;
     }
