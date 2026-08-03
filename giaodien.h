@@ -500,7 +500,7 @@ namespace giaodien {
     //================ Quản lý độc giả ================//
     //================= Thêm độc giả ==================//
     inline void FormThemDocGiaTUI(DocGiaNode*& Root) {
-        const int ChieuRong = 118, ChieuCao = 18, X0 = 4, Y0 = 3;
+        const int ChieuRong = 118, ChieuCao = 16, X0 = 4, Y0 = 3;
         const int FooterY = 1 + ChieuCao - 2;
         tui::XoaManHinh();
         tui::VeKhung(2, 1, ChieuRong, ChieuCao, "QUAN LY DOC GIA  >  THEM DOC GIA");
@@ -522,10 +522,6 @@ namespace giaodien {
         tui::DiChuyenConTro(X0, Y);
         std::cout << "Gioi tinh        : ";
         int GtX = X0 + 19, GtY = Y;
-        Y += 2;
-        tui::DiChuyenConTro(X0, Y);
-        std::cout << "Trang thai       : ";
-        int TtX = X0 + 19, TtY = Y;
         Y += 2;
         tui::InHuongDanCuoiTrang(4, FooterY, "[Enter] Chon/Luu  -  [Esc] Quay lai  -  (Left/Right) doi tuy chon");
         LamSachBoDemNhap();
@@ -579,8 +575,7 @@ namespace giaodien {
         std::cout << std::string(90, ' ');
         int SelGT = ChonRadioTaiViTri(GtX, GtY, { "Nam", "Nu" }, 0);
         std::string PhaiNhap = (SelGT == 1 ? "Nu" : "Nam");
-        int SelTT = ChonRadioTaiViTri(TtX, TtY, { "Hoat dong", "Khoa" }, 0);
-        int TrangThaiNhap = (SelTT == 0 ? 1 : 0);
+        int TrangThaiNhap = 1;
         std::string ThongBaoLoi;
         bool ThemThanhCong = ThemDocGia(Root, MaTheCanXuLy, HoNhap, TenNhap, PhaiNhap, TrangThaiNhap, &ThongBaoLoi);
         tui::DiChuyenConTro(X0, FooterY - 2);
@@ -646,6 +641,22 @@ namespace giaodien {
             tui::DiChuyenConTro(X0, FooterY - 2);
             tui::DatMau(tui::MauCanhBao);
             std::cout << "Ma the khong hop le hoac khong ton tai.";
+            tui::DatLaiMau();
+            tui::NhanPhimBatKyDeQuayLai(4, FooterY - 1);
+            return;
+        }
+        DocGiaNode* ConTroHienTai = TimDocGiaTheoMaThe(Root, MaTheCanXuLy);
+        std::string HoTenDocGia = std::string(ConTroHienTai->ThongTin.Ho) + " " + ConTroHienTai->ThongTin.Ten;
+        if ((int)HoTenDocGia.length() > 43) {
+            HoTenDocGia = HoTenDocGia.substr(0, 43);
+        }
+        tui::DiChuyenConTro(X0 + 55, MaY);
+        std::cout << "Ten doc gia: " << HoTenDocGia;
+        int SoSachDangMuon = DemSoSachDocGiaDangMuon(ConTroHienTai->ThongTin);
+        if (SoSachDangMuon > 0) {
+            tui::DiChuyenConTro(X0, Y + 2);
+            tui::DatMau(tui::MauCanhBao);
+            std::cout << "Khong the xoa: doc gia dang muon " << SoSachDangMuon << " cuon sach.";
             tui::DatLaiMau();
             tui::NhanPhimBatKyDeQuayLai(4, FooterY - 1);
             return;
