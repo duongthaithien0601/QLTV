@@ -190,11 +190,11 @@ inline void LuuDocGiaTheoThuTu(std::ofstream& Fo, DocGiaNode* Root) {
     if (Root == NULL) {
         return;
     }
-    LuuDocGiaTheoThuTu(Fo, Root->Left);
     const DocGia& DocGiaCanXuLy = Root->ThongTin;
-    Fo
-        << DocGiaCanXuLy.MaThe << "|" << DocGiaCanXuLy.Ho << "|" << DocGiaCanXuLy.Ten << "|" << DocGiaCanXuLy.Phai << "|" << DocGiaCanXuLy.TrangThaiThe
-        << "\n";
+    Fo << DocGiaCanXuLy.MaThe << "|" << DocGiaCanXuLy.Ho << "|" << DocGiaCanXuLy.Ten << "|" << DocGiaCanXuLy.Phai << "|" 
+       << DocGiaCanXuLy.TrangThaiThe
+       << "\n";
+    LuuDocGiaTheoThuTu(Fo, Root->Left);
     LuuDocGiaTheoThuTu(Fo, Root->Right);
 }
 // Lưu toàn bộ cây độc giả xuống tệp

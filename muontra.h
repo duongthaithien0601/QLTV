@@ -27,7 +27,7 @@ inline void ThemPhieuMuonTraChoDocGia(
     const NgayThangNam& NgayMuon,
     const NgayThangNam& NgayTra,
     int TrangThai
-) {
+){
     MuonTraNode* NodeMoi = new MuonTraNode();
     SaoChepChuoi(NodeMoi->MaSach, MaxMaSach, MaSach);
     NodeMoi->NgayMuon = NgayMuon;
@@ -38,35 +38,18 @@ inline void ThemPhieuMuonTraChoDocGia(
 }
 
 // ========== KIỂM TRA TÌNH TRẠNG SÁCH TRÊN TOÀN HỆ THỐNG ====================
-// Lấy địa chỉ các phiếu đang mượn của một độc giả vào mảng tối đa 3 phần tử
+// Lấy địa chỉ các phiếu đang mượn của một độc giả 
 inline void LayDanhSachPhieuDangMuon(const DocGia& DocGiaCanXuLy, MuonTraNode* DanhSachKetQua[], int& SoLuongKetQua){
     SoLuongKetQua = 0;
-    for (
-        MuonTraNode* ConTroHienTai = DocGiaCanXuLy.MuonTraHead;
-        ConTroHienTai != NULL && SoLuongKetQua < 3;
-        ConTroHienTai = ConTroHienTai->Next
+    for (MuonTraNode* ConTroHienTai = DocGiaCanXuLy.MuonTraHead;
+         ConTroHienTai != NULL && SoLuongKetQua < 3;
+         ConTroHienTai = ConTroHienTai->Next
         ){
         if (ConTroHienTai->TrangThai == 0){
             DanhSachKetQua[SoLuongKetQua] = ConTroHienTai;
             SoLuongKetQua++;
         }
     }
-}
-// Tìm phiếu đang mượn theo mã sách
-inline MuonTraNode* TimPhieuDangMuonTheoMaSach(DocGia& DocGiaCanXuLy, const char MaSachCanTim[]) {
-    if (MaSachCanTim == NULL) {
-        return NULL;
-    }
-    for (
-        MuonTraNode* ConTroHienTai = DocGiaCanXuLy.MuonTraHead;
-        ConTroHienTai != NULL;
-        ConTroHienTai = ConTroHienTai->Next
-        ) {
-        if (ConTroHienTai->TrangThai == 0 && std::strcmp(ConTroHienTai->MaSach, MaSachCanTim) == 0) {
-            return ConTroHienTai;
-        }
-    }
-    return NULL;
 }
 // Kiểm tra độc giả có đang mượn một bản sao thuộc ISBN cần tìm hay không
 inline bool KiemTraDocGiaDangMuonISBN(const DocGia& DocGiaCanXuLy, const char ISBNCanKiemTra[]){
@@ -90,7 +73,7 @@ inline bool KiemTraDocGiaDangMuonISBN(const DocGia& DocGiaCanXuLy, const char IS
     return false;
 }
 // ===================== KIỂM TRA QUÁ HẠN =======================
-inline bool KiemTraDocGiaQuaHanDenNgay(const DocGia& DocGiaCanXuLy, const NgayThangNam& NgayKiemTra, int* KetQuaSoNgayTreLonNhat = NULL) {
+inline bool KiemTraDocGiaQuaHanDenNgay(const DocGia& DocGiaCanXuLy, const NgayThangNam& NgayKiemTra, int* KetQuaSoNgayTreLonNhat = NULL){
     int SoNgayTreLonNhat = 0;
     bool CoSachQuaHan = false;
     for (
@@ -116,12 +99,7 @@ inline bool KiemTraDocGiaQuaHanDenNgay(const DocGia& DocGiaCanXuLy, const NgayTh
 
 // =================== MƯỢN / TRẢ ==================
 // Kiểm tra điều kiện và thực hiện cho độc giả mượn một bản sao
-inline bool MuonSach(
-    DocGia& DocGiaCanXuLy,
-    DauSach& DuLieuSach,
-    const NgayThangNam& NgayMuon,
-    std::string* MaSachDaMuon = NULL
-) {
+inline bool MuonSach(DocGia& DocGiaCanXuLy, DauSach& DuLieuSach, const NgayThangNam& NgayMuon, std::string* MaSachDaMuon = NULL){
     if (!KiemTraNgayKhongVuotQuaHienTai(NgayMuon)) {
         return false;
     }

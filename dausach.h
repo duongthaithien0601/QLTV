@@ -4,7 +4,6 @@
 #include <ctime>
 #include "cautruc.h"
 
-
 // ======================= DỮ LIỆU KẾT QUẢ =======================
 struct ThongTinDauSachTheoTheLoai {
     DauSach* DuLieuSach;
@@ -212,8 +211,6 @@ inline void DatLaiTrangThaiTatCaBanSao(DanhSachDauSach& DanhSachDauSach) {
 }
 // Tự động tạo bản sao cho các đầu sách trong danh sách
 inline void TaoBanSaoTuDong(DauSach* DuLieuSach, int SoLuongCanXuLy, const std::string& KeNhap);
-// Tự động xóa bản sao từ cuối danh sách cho các đầu sách trong danh sách
-inline bool GiamBanSaoTuCuoi(DauSach* DuLieuSach, int SoLuongCanXoa);
 // Kiểm tra danh sách đầu sách đã đạt số lượng tối đa hay chưa
 inline bool KiemTraDanhSachDauSachDay(const DanhSachDauSach& DuLieuSach) {
     return DuLieuSach.SoLuong >= MaxDauSach;
@@ -359,19 +356,9 @@ inline bool ThemDauSachMoi(
     }
     return true;
 }
-// Lấy thông tin số bản sao trước khi xác nhận xóa đầu sách
-inline bool LayThongTinDauSachDeXoa(const DanhSachDauSach& DanhSachDauSach, const std::string& ISBNCanXuLy, int& TongSoBanSao, int& SoSachDangMuon){
-    DauSach* DuLieuSach = TimDauSachTheoISBN(DanhSachDauSach, ISBNCanXuLy.c_str());
-    if (DuLieuSach == NULL) {
-        return false;
-    }
-    TongSoBanSao = DemTongSoBanSao(DuLieuSach);
-    SoSachDangMuon = DemSoSachDangMuon(DuLieuSach);
-    return true;
-}
 
 // ====================== QUẢN LÝ BẢN SAO ======================
-// Tạo thêm các bản sao theo chỉ số lớn nhất đã từng được sử dụng
+// Tạo bản sao mới cho đầu sách với số lượng và kệ được chỉ định
 inline void TaoBanSaoTuDong(DauSach* DuLieuSach, int SoLuongCanXuLy, const std::string& KeNhap){
     std::string KeDaChuanHoa = ChuanHoaKe(KeNhap);
     if (DuLieuSach == NULL || SoLuongCanXuLy <= 0 || KeDaChuanHoa.empty()) {
@@ -557,7 +544,7 @@ inline void ChenDauSachTheoTheLoaiVaTen(DauSach* DanhSachDich[], int& SoPhanTu, 
     SoPhanTu++;
 }
 // Lập danh sách đầu sách bằng cách lần lượt chèn từng đầu sách vào đúng vị trí
-inline void LayDanhSachSapXepTheoTheLoai(const DanhSachDauSach& DanhSachNguon, DauSach* DanhSachDich[], int& SoPhanTu) {
+inline void LayDanhSachSapXepTheoTheLoai(const DanhSachDauSach& DanhSachNguon, DauSach* DanhSachDich[], int& SoPhanTu){
     SoPhanTu = 0;
     if (DanhSachDich == NULL) {
         return;
@@ -569,9 +556,7 @@ inline void LayDanhSachSapXepTheoTheLoai(const DanhSachDauSach& DanhSachNguon, D
     }
 }
 // Lập dữ liệu đầu sách đã chia nhóm theo từng thể loại
-inline void LapDanhSachDauSachTheoTheLoai(
-    const DanhSachDauSach& DanhSachNguon,
-    ThongTinDauSachTheoTheLoai DanhSachKetQua[],
+inline void LapDanhSachDauSachTheoTheLoai(const DanhSachDauSach& DanhSachNguon, ThongTinDauSachTheoTheLoai DanhSachKetQua[],
     int& SoLuongKetQua,
     int SoPhanTuToiDa = MaxDauSach
 ) {
