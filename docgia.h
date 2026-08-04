@@ -147,19 +147,25 @@ inline int TaoMaTheKhongTrung(DocGiaNode* Root) {
 // =================== NGHIỆP VỤ THÊM / CẬP NHẬT ĐỘC GIẢ ===================
 // Kiểm tra dữ liệu và thêm độc giả mới vào cây
 inline bool ThemDocGia(
-    DocGiaNode*& Root, int MaTheCanXuLy, 
+    DocGiaNode*& Root,
+    int MaTheCanXuLy,
     const std::string& HoNhap,
     const std::string& TenNhap,
     const std::string& PhaiNhap,
-    int TrangThaiNhap,
-    std::string* ThongBaoLoi = NULL
-){
+    int TrangThaiNhap
+) {
     std::string HoDaChuanHoa = ChuanHoaChuoi(HoNhap);
     std::string TenDaChuanHoa = ChuanHoaChuoi(TenNhap);
     if (MaTheCanXuLy <= 0 || KiemTraMaTheTonTai(Root, MaTheCanXuLy)) {
         return false;
     }
-    if (!KiemTraThongTinDocGiaNhap(HoDaChuanHoa, TenDaChuanHoa, PhaiNhap, TrangThaiNhap)){
+    if (HoDaChuanHoa.empty() || TenDaChuanHoa.empty()) {
+        return false;
+    }
+    if (PhaiNhap != "Nam" && PhaiNhap != "Nu") {
+        return false;
+    }
+    if (TrangThaiNhap != 0 && TrangThaiNhap != 1) {
         return false;
     }
     DocGia DocGiaCanThem;
@@ -174,26 +180,29 @@ inline bool ThemDocGia(
 }
 // Cập nhật thông tin của độc giả theo mã thẻ
 inline bool CapNhatThongTinDocGia(
-    DocGiaNode* Root, int MaTheCanXuLy, 
+    DocGiaNode* Root,
+    int MaTheCanXuLy,
     const std::string& HoMoi,
     const std::string& TenMoi,
     const std::string& PhaiMoi,
-    int TrangThaiMoi,
-    std::string* ThongBaoLoi = NULL
+    int TrangThaiMoi
 ) {
     DocGiaNode* NodeDocGia = TimDocGiaTheoMaThe(Root, MaTheCanXuLy);
     if (NodeDocGia == NULL) {
         return false;
     }
-    std::string HoDaChuanHoa = ChuanHoaChuoi(HoMoi);
-    std::string TenDaChuanHoa = ChuanHoaChuoi(TenMoi);
-    if (!KiemTraThongTinDocGiaCapNhat(HoMoi, TenMoi, PhaiMoi, TrangThaiMoi, ThongBaoLoi)){
+    if (PhaiMoi != "Nam" && PhaiMoi != "Nu") {
         return false;
     }
-    if (!HoMoi.empty()) {
+    if (TrangThaiMoi != 0 && TrangThaiMoi != 1) {
+        return false;
+    }
+    std::string HoDaChuanHoa = ChuanHoaChuoi(HoMoi);
+    std::string TenDaChuanHoa = ChuanHoaChuoi(TenMoi);
+    if (!HoDaChuanHoa.empty()) {
         SaoChepChuoi(NodeDocGia->ThongTin.Ho, 50, HoDaChuanHoa);
     }
-    if (!TenMoi.empty()) {
+    if (!TenDaChuanHoa.empty()) {
         SaoChepChuoi(NodeDocGia->ThongTin.Ten, 30, TenDaChuanHoa);
     }
     SaoChepChuoi(NodeDocGia->ThongTin.Phai, 5, PhaiMoi);

@@ -14,21 +14,17 @@ struct ThongKeQuaHan {
 // Chèn địa chỉ một đầu sách vào danh sách Top 10 theo số lượt mượn giảm dần
 inline void ChenDauSachVaoTop10(DauSach* DanhSachKetQua[], int& SoLuongKetQua, DauSach* DauSachCanChen) {
     int ViTriChen = 0;
-    while (
-        ViTriChen < SoLuongKetQua&&
-        DanhSachKetQua[ViTriChen]->SoLuotMuon >= DauSachCanChen->SoLuotMuon
-        ) {
+    while (ViTriChen < SoLuongKetQua && DanhSachKetQua[ViTriChen]->SoLuotMuon >= DauSachCanChen->SoLuotMuon){
         ViTriChen++;
     }
-    // Nếu mảng đã đủ 10 phần tử và đầu sách mới không thuộc Top 10 thì không chèn
-    if (ViTriChen >= 10) {
+    if (ViTriChen >= 10){
         return;
     }
     int ViTriCuoi = SoLuongKetQua;
-    if (ViTriCuoi >= 10) {
+    if (ViTriCuoi >= 10){
         ViTriCuoi = 9;
     }
-    for (int i = ViTriCuoi; i > ViTriChen; i--) {
+    for (int i = ViTriCuoi; i > ViTriChen; i--){
         DanhSachKetQua[i] = DanhSachKetQua[i - 1];
     }
     DanhSachKetQua[ViTriChen] = DauSachCanChen;
@@ -58,8 +54,8 @@ inline int DemSoPhieuQuaHan(DocGiaNode* Root, const NgayThangNam& NgayKiemTra) {
         const MuonTraNode* ConTroHienTai = Root->ThongTin.MuonTraHead;
         ConTroHienTai != NULL;
         ConTroHienTai = ConTroHienTai->Next
-        ) {
-        if (ConTroHienTai->TrangThai == 0 && TinhSoNgayTre(ConTroHienTai->NgayMuon, NgayKiemTra) > 0) {
+        ){
+        if (ConTroHienTai->TrangThai == 0 && TinhSoNgayTre(ConTroHienTai->NgayMuon, NgayKiemTra) > 0){
             SoLuongDem++;
         }
     }

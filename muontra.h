@@ -4,9 +4,6 @@
 #include "dausach.h"
 #include "docgia.h"
 
-
-
-
 // ======================= DỮ LIỆU KẾT QUẢ =======================
 struct ThongTinSachDangMuon {
     MuonTraNode* PhieuMuon;
@@ -42,14 +39,14 @@ inline void ThemPhieuMuonTraChoDocGia(
 
 // ========== KIỂM TRA TÌNH TRẠNG SÁCH TRÊN TOÀN HỆ THỐNG ====================
 // Lấy địa chỉ các phiếu đang mượn của một độc giả vào mảng tối đa 3 phần tử
-inline void LayDanhSachPhieuDangMuon(const DocGia& DocGiaCanXuLy, MuonTraNode* DanhSachKetQua[], int& SoLuongKetQua) {
+inline void LayDanhSachPhieuDangMuon(const DocGia& DocGiaCanXuLy, MuonTraNode* DanhSachKetQua[], int& SoLuongKetQua){
     SoLuongKetQua = 0;
     for (
         MuonTraNode* ConTroHienTai = DocGiaCanXuLy.MuonTraHead;
         ConTroHienTai != NULL && SoLuongKetQua < 3;
         ConTroHienTai = ConTroHienTai->Next
-        ) {
-        if (ConTroHienTai->TrangThai == 0) {
+        ){
+        if (ConTroHienTai->TrangThai == 0){
             DanhSachKetQua[SoLuongKetQua] = ConTroHienTai;
             SoLuongKetQua++;
         }
@@ -80,8 +77,8 @@ inline bool KiemTraDocGiaDangMuonISBN(const DocGia& DocGiaCanXuLy, const char IS
         const MuonTraNode* ConTroHienTai = DocGiaCanXuLy.MuonTraHead;
         ConTroHienTai != NULL;
         ConTroHienTai = ConTroHienTai->Next
-        ) {
-        if (ConTroHienTai->TrangThai != 0) {
+        ){
+        if (ConTroHienTai->TrangThai != 0){
             continue;
         }
         char ISBNDangMuon[15];

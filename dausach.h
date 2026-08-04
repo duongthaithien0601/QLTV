@@ -4,6 +4,7 @@
 #include <ctime>
 #include "cautruc.h"
 
+
 // ======================= DỮ LIỆU KẾT QUẢ =======================
 struct ThongTinDauSachTheoTheLoai {
     DauSach* DuLieuSach;
@@ -331,9 +332,7 @@ inline bool ThemDauSachMoi(
     int NamXuatBanNhap,
     const std::string& TheLoaiNhap,
     const std::string& KeNhap,
-    int SoLuongBanSaoNhap,
-    std::string* ThongBaoLoi = NULL
-) {
+    int SoLuongBanSaoNhap) {
     if (KiemTraDanhSachDauSachDay(DanhSachDauSach)) {
         return false;
     }
@@ -341,12 +340,6 @@ inline bool ThemDauSachMoi(
     std::string TacGiaDaChuanHoa = ChuanHoaChuoi(TacGiaNhap);
     std::string TheLoaiDaChuanHoa = ChuanHoaChuoi(TheLoaiNhap);
     std::string KeDaChuanHoa = ChuanHoaKe(KeNhap);
-    if (!KiemTraThongTinDauSachNhap(
-        TenDaChuanHoa, TacGiaDaChuanHoa, TheLoaiDaChuanHoa, KeDaChuanHoa,
-        SoTrangNhap, NamXuatBanNhap, SoLuongBanSaoNhap, ThongBaoLoi
-    )) {
-        return false;
-    }
     DauSach* DauSachMoi = new DauSach();
     SaoChepChuoi(DauSachMoi->ISBN, 15, ISBNCanXuLy);
     SaoChepChuoi(DauSachMoi->TenSach, 100, TenDaChuanHoa);
@@ -359,16 +352,15 @@ inline bool ThemDauSachMoi(
     DauSachMoi->SoLuotMuon = 0;
     DauSachMoi->DanhMucSachHead = NULL;
     TaoBanSaoTuDong(DauSachMoi, SoLuongBanSaoNhap, KeDaChuanHoa);
-    ChenDauSachTheoTen(DanhSachDauSach, DauSachMoi);
+    if (!ChenDauSachTheoTen(DanhSachDauSach, DauSachMoi)) {
+        GiaiPhongDanhMucSach(DauSachMoi->DanhMucSachHead);
+        delete DauSachMoi;
+        return false;
+    }
     return true;
 }
 // Lấy thông tin số bản sao trước khi xác nhận xóa đầu sách
-inline bool LayThongTinDauSachDeXoa(
-    const DanhSachDauSach& DanhSachDauSach,
-    const std::string& ISBNCanXuLy,
-    int& TongSoBanSao,
-    int& SoSachDangMuon
-) {
+inline bool LayThongTinDauSachDeXoa(const DanhSachDauSach& DanhSachDauSach, const std::string& ISBNCanXuLy, int& TongSoBanSao, int& SoSachDangMuon){
     DauSach* DuLieuSach = TimDauSachTheoISBN(DanhSachDauSach, ISBNCanXuLy.c_str());
     if (DuLieuSach == NULL) {
         return false;
@@ -380,7 +372,7 @@ inline bool LayThongTinDauSachDeXoa(
 
 // ====================== QUẢN LÝ BẢN SAO ======================
 // Tạo thêm các bản sao theo chỉ số lớn nhất đã từng được sử dụng
-inline void TaoBanSaoTuDong(DauSach* DuLieuSach, int SoLuongCanXuLy, const std::string& KeNhap) {
+inline void TaoBanSaoTuDong(DauSach* DuLieuSach, int SoLuongCanXuLy, const std::string& KeNhap){
     std::string KeDaChuanHoa = ChuanHoaKe(KeNhap);
     if (DuLieuSach == NULL || SoLuongCanXuLy <= 0 || KeDaChuanHoa.empty()) {
         return;
@@ -451,8 +443,7 @@ inline bool CapNhatThongTinDauSach(
     int SoTrangMoi,
     const std::string& KeMoi,
     int CoThayDoiSoLuong,
-    int SoLuongBanSaoMoi,
-    std::string* ThongBaoLoi = NULL
+    int SoLuongBanSaoMoi
 ) {
     DauSach* DuLieuSach = TimDauSachTheoISBN(DanhSachDauSach, ISBNCanXuLy.c_str());
     if (DuLieuSach == NULL) {
@@ -461,9 +452,6 @@ inline bool CapNhatThongTinDauSach(
     std::string TenDaChuanHoa = ChuanHoaChuoi(TenSachMoi);
     std::string TacGiaDaChuanHoa = ChuanHoaChuoi(TacGiaMoi);
     std::string KeDaChuanHoa = ChuanHoaKe(KeMoi);
-    if (!KiemTraThongTinDauSachCapNhat(TenSachMoi, TacGiaMoi, NamXuatBanMoi, SoTrangMoi, KeMoi, ThongBaoLoi)) {
-        return false;
-    }
     if (CoThayDoiSoLuong == 1 && !KiemTraSoLuongBanSaoMoi(DuLieuSach, SoLuongBanSaoMoi)) {
         return false;
     }
@@ -474,6 +462,9 @@ inline bool CapNhatThongTinDauSach(
     // Cập nhật số lượng bản sao trước
     if (CoThayDoiSoLuong == 1) {
         if (SoLuongBanSaoMoi > DuLieuSach->SoLuongBanSao) {
+            if (KeDungDeTaoBanSao.empty()) {
+                return false;
+            }
             TaoBanSaoTuDong(DuLieuSach, SoLuongBanSaoMoi - DuLieuSach->SoLuongBanSao, KeDungDeTaoBanSao);
         }
         else if (SoLuongBanSaoMoi < DuLieuSach->SoLuongBanSao) {
@@ -484,12 +475,11 @@ inline bool CapNhatThongTinDauSach(
     }
     // Ghi nhận tên sách có thực sự thay đổi hay không
     bool CoThayDoiTen = false;
-    if (!TenSachMoi.empty()) {
+    if (!TenDaChuanHoa.empty()) {
         CoThayDoiTen = std::strcmp(DuLieuSach->TenSach, TenDaChuanHoa.c_str()) != 0;
-
         SaoChepChuoi(DuLieuSach->TenSach, 100, TenDaChuanHoa);
     }
-    if (!TacGiaMoi.empty()) {
+    if (!TacGiaDaChuanHoa.empty()) {
         SaoChepChuoi(DuLieuSach->TacGia, 60, TacGiaDaChuanHoa);
     }
     if (NamXuatBanMoi != 0) {
@@ -498,10 +488,10 @@ inline bool CapNhatThongTinDauSach(
     if (SoTrangMoi != 0) {
         DuLieuSach->SoTrang = SoTrangMoi;
     }
-    if (!KeMoi.empty()) {
+    if (!KeDaChuanHoa.empty()) {
         CapNhatKeChoTatCaBanSao(DuLieuSach, KeDaChuanHoa);
     }
-    // Nếu tên sách thay đổi thì tách khỏi vị trí cũ rồi chèn lại 
+    // Nếu tên sách thay đổi thì tách khỏi vị trí cũ rồi chèn lại
     if (CoThayDoiTen) {
         TachDauSachKhoiMang(DanhSachDauSach, DuLieuSach);
         ChenDauSachTheoTen(DanhSachDauSach, DuLieuSach);
