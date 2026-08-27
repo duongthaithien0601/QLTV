@@ -57,7 +57,11 @@ inline int DemTongSoBanSao(const DauSach* DuLieuSach) {
         return 0;
     }
     int Dem = 0;
-    for (const DanhMucSachNode* ConTroHienTai = DuLieuSach->DanhMucSachHead; ConTroHienTai != NULL; ConTroHienTai = ConTroHienTai->Next) {
+    for (
+        const DanhMucSachNode* ConTroHienTai = DuLieuSach->DanhMucSachHead;
+        ConTroHienTai != NULL;
+        ConTroHienTai = ConTroHienTai->Next
+        ){
         Dem++;
     }
     return Dem;
@@ -68,7 +72,11 @@ inline int DemSoSachDangMuon(const DauSach* DuLieuSach) {
         return 0;
     }
     int Dem = 0;
-    for (const DanhMucSachNode* ConTroHienTai = DuLieuSach->DanhMucSachHead; ConTroHienTai != NULL; ConTroHienTai = ConTroHienTai->Next) {
+    for (
+        const DanhMucSachNode* ConTroHienTai = DuLieuSach->DanhMucSachHead; 
+        ConTroHienTai != NULL; 
+        ConTroHienTai = ConTroHienTai->Next
+        ){
         if (ConTroHienTai->TrangThai == 1) {
             Dem++;
         }
@@ -83,8 +91,12 @@ inline DanhMucSachNode* TimSachCoTheMuonDauTien(DauSach* DuLieuSach) {
     if (DuLieuSach == NULL) {
         return NULL;
     }
-    for (DanhMucSachNode* ConTroHienTai = DuLieuSach->DanhMucSachHead; ConTroHienTai != NULL; ConTroHienTai = ConTroHienTai->Next) {
-        if (ConTroHienTai->TrangThai == 0) {
+    for (
+        DanhMucSachNode* ConTroHienTai = DuLieuSach->DanhMucSachHead;
+        ConTroHienTai != NULL;
+        ConTroHienTai = ConTroHienTai->Next
+        ){
+        if (ConTroHienTai->TrangThai == 0){
             return ConTroHienTai;
         }
     }
@@ -95,7 +107,11 @@ inline DanhMucSachNode* TimSachTheoMaSach(DauSach* DuLieuSach, const char MaSach
     if (DuLieuSach == NULL || MaSach == NULL) {
         return NULL;
     }
-    for (DanhMucSachNode* ConTroHienTai = DuLieuSach->DanhMucSachHead; ConTroHienTai != NULL; ConTroHienTai = ConTroHienTai->Next) {
+    for (
+        DanhMucSachNode* ConTroHienTai = DuLieuSach->DanhMucSachHead;
+        ConTroHienTai != NULL;
+        ConTroHienTai = ConTroHienTai->Next
+        ){
         if (std::strcmp(ConTroHienTai->MaSach, MaSach) == 0) {
             return ConTroHienTai;
         }
@@ -105,7 +121,7 @@ inline DanhMucSachNode* TimSachTheoMaSach(DauSach* DuLieuSach, const char MaSach
 
 // =================== THÊM / GỠ BẢN SAO ===================
 // Thêm một bản sao vào cuối danh mục sách
-inline void ThemSachVaoCuoiDanhMuc(DauSach* DuLieuSach, DanhMucSachNode* NodeCanXuLy) {
+inline void ThemSachVaoCuoiDanhMuc(DauSach* DuLieuSach, DanhMucSachNode* NodeCanXuLy){
     if (DuLieuSach == NULL || NodeCanXuLy == NULL) {
         return;
     }
@@ -204,7 +220,11 @@ inline void DatLaiTrangThaiTatCaBanSao(DanhSachDauSach& DanhSachDauSach) {
         if (DuLieuSach == NULL) {
             continue;
         }
-        for (DanhMucSachNode* ConTroHienTai = DuLieuSach->DanhMucSachHead;ConTroHienTai != NULL;ConTroHienTai = ConTroHienTai->Next) {
+        for (
+            DanhMucSachNode* ConTroHienTai = DuLieuSach->DanhMucSachHead;
+            ConTroHienTai != NULL;
+            ConTroHienTai = ConTroHienTai->Next
+            ){
             ConTroHienTai->TrangThai = 0;
         }
     }
@@ -277,7 +297,7 @@ inline bool XoaBanSaoTheoMaSach(DauSach* DuLieuSach, const std::string& MaSachCa
     }
     DanhMucSachNode* ConTroTruoc = NULL;
     DanhMucSachNode* ConTroHienTai = DuLieuSach->DanhMucSachHead;
-    while (ConTroHienTai != NULL && std::strcmp(ConTroHienTai->MaSach, MaSachCanXoa.c_str()) != 0) {
+    while (ConTroHienTai != NULL && std::strcmp(ConTroHienTai->MaSach, MaSachCanXoa.c_str()) != 0){
         ConTroTruoc = ConTroHienTai;
         ConTroHienTai = ConTroHienTai->Next;
     }
@@ -380,14 +400,17 @@ inline bool GiamBanSaoTuCuoi(DauSach* DuLieuSach, int SoLuongCanXoa) {
     }
     DanhMucSachNode* Nodes[5000];
     int SoLuongTimThay = 0;
-    for (DanhMucSachNode* ConTroHienTai = DuLieuSach->DanhMucSachHead; ConTroHienTai != NULL;
-        ConTroHienTai = ConTroHienTai->Next) {
+    for (
+        DanhMucSachNode* ConTroHienTai = DuLieuSach->DanhMucSachHead;
+        ConTroHienTai != NULL;
+        ConTroHienTai = ConTroHienTai->Next
+        ){
         if (SoLuongTimThay < 5000) {
             Nodes[SoLuongTimThay++] = ConTroHienTai;
         }
     }
     int DaXoa = 0;
-    for (int i = SoLuongTimThay - 1; i >= 0 && DaXoa < SoLuongCanXoa; --i) {
+    for (int i = SoLuongTimThay - 1; i >= 0 && DaXoa < SoLuongCanXoa; --i){
         DanhMucSachNode* ChiSoHienTai = Nodes[i];
         if (ChiSoHienTai->TrangThai == 1) {
             continue;
@@ -556,7 +579,9 @@ inline void LayDanhSachSapXepTheoTheLoai(const DanhSachDauSach& DanhSachNguon, D
     }
 }
 // Lập dữ liệu đầu sách đã chia nhóm theo từng thể loại
-inline void LapDanhSachDauSachTheoTheLoai(const DanhSachDauSach& DanhSachNguon, ThongTinDauSachTheoTheLoai DanhSachKetQua[],
+inline void LapDanhSachDauSachTheoTheLoai(
+    const DanhSachDauSach& DanhSachNguon,
+    ThongTinDauSachTheoTheLoai DanhSachKetQua[],
     int& SoLuongKetQua,
     int SoPhanTuToiDa = MaxDauSach
 ) {

@@ -2,6 +2,9 @@
 #include "cautruc.h"
 #include "dausach.h"
 
+
+
+
 // ======================= DỮ LIỆU THỐNG KÊ =======================
 struct ThongKeQuaHan {
     DocGia* DuLieuDocGia;
@@ -12,7 +15,7 @@ struct ThongKeQuaHan {
 
 // ======================= TOP 10 SÁCH MƯỢN NHIỀU NHẤT =======================
 // Chèn địa chỉ một đầu sách vào danh sách Top 10 theo số lượt mượn giảm dần
-inline void ChenDauSachVaoTop10(DauSach* DanhSachKetQua[], int& SoLuongKetQua, DauSach* DauSachCanChen) {
+inline void ChenDauSachVaoTop10(DauSach* DanhSachKetQua[], int& SoLuongKetQua, DauSach* DauSachCanChen){
     int ViTriChen = 0;
     while (ViTriChen < SoLuongKetQua && DanhSachKetQua[ViTriChen]->SoLuotMuon >= DauSachCanChen->SoLuotMuon){
         ViTriChen++;
@@ -33,7 +36,7 @@ inline void ChenDauSachVaoTop10(DauSach* DanhSachKetQua[], int& SoLuongKetQua, D
     }
 }
 // Lập Top 10 bằng cách duy trì trực tiếp một mảng tối đa 10 địa chỉ đầu sách
-inline void ThongKeTop10TheoLuotMuon(const DanhSachDauSach& DanhSachDauSach, DauSach* DanhSachKetQua[], int& SoLuongKetQua) {
+inline void ThongKeTop10TheoLuotMuon(const DanhSachDauSach& DanhSachDauSach, DauSach* DanhSachKetQua[], int& SoLuongKetQua){
     SoLuongKetQua = 0;
     for (int i = 0; i < DanhSachDauSach.SoLuong; i++) {
         DauSach* DuLieuSach = DanhSachDauSach.Nodes[i];
@@ -49,14 +52,26 @@ inline int DemSoPhieuQuaHan(DocGiaNode* Root, const NgayThangNam& NgayKiemTra) {
     if (Root == NULL) {
         return 0;
     }
-    int SoLuongDem = DemSoPhieuQuaHan(Root->Left, NgayKiemTra) + DemSoPhieuQuaHan(Root->Right, NgayKiemTra);
-    for (
-        const MuonTraNode* ConTroHienTai = Root->ThongTin.MuonTraHead;
-        ConTroHienTai != NULL;
-        ConTroHienTai = ConTroHienTai->Next
-        ){
-        if (ConTroHienTai->TrangThai == 0 && TinhSoNgayTre(ConTroHienTai->NgayMuon, NgayKiemTra) > 0){
-            SoLuongDem++;
+    DocGiaNode* NganXep[MaxDocGia];
+    int Dinh = -1;
+    NganXep[++Dinh] = Root;
+    int SoLuongDem = 0;
+    while (Dinh >= 0) {
+        DocGiaNode* NodeHienTai = NganXep[Dinh--];
+        for (
+            const MuonTraNode* ConTroHienTai = NodeHienTai->ThongTin.MuonTraHead;
+            ConTroHienTai != NULL;
+            ConTroHienTai = ConTroHienTai->Next
+            ){
+            if (ConTroHienTai->TrangThai == 0 && TinhSoNgayTre(ConTroHienTai->NgayMuon, NgayKiemTra) > 0) {
+                SoLuongDem++;
+            }
+        }
+        if (NodeHienTai->Left != NULL) {
+            NganXep[++Dinh] = NodeHienTai->Left;
+        }
+        if (NodeHienTai->Right != NULL) {
+            NganXep[++Dinh] = NodeHienTai->Right;
         }
     }
     return SoLuongDem;
@@ -96,30 +111,35 @@ inline void DuyetCayThongKeQuaHan(
     int& SoLuongKetQua,
     int SoPhanTuToiDa
 ) {
-    if (Root == NULL || SoLuongKetQua >= SoPhanTuToiDa) {
-        return;
-    }
-    DuyetCayThongKeQuaHan(Root->Left, DanhSachDauSach, NgayKiemTra, DanhSachQuaHan, SoLuongKetQua, SoPhanTuToiDa);
-    DocGia* DuLieuDocGia = &Root->ThongTin;
-    for (
-        MuonTraNode* PhieuMuon = DuLieuDocGia->MuonTraHead;
-        PhieuMuon != NULL;
-        PhieuMuon = PhieuMuon->Next
-        ) {
-        // Chỉ xét các phiếu đang mượn
-        if (PhieuMuon->TrangThai != 0) {
-            continue;
+    DocGiaNode* NganXep[MaxDocGia];
+    int Dinh = -1;
+    DocGiaNode* ConTroHienTai = Root;
+    while ((ConTroHienTai != NULL || Dinh >= 0) && SoLuongKetQua < SoPhanTuToiDa) {
+        while (ConTroHienTai != NULL) {
+            NganXep[++Dinh] = ConTroHienTai;
+            ConTroHienTai = ConTroHienTai->Left;
         }
-        int SoNgayTre = TinhSoNgayTre(PhieuMuon->NgayMuon, NgayKiemTra);
-        if (SoNgayTre <= 0) {
-            continue;
+        ConTroHienTai = NganXep[Dinh--];
+        DocGia* DuLieuDocGia = &ConTroHienTai->ThongTin;
+        for (
+            MuonTraNode* PhieuMuon = DuLieuDocGia->MuonTraHead;
+            PhieuMuon != NULL;
+            PhieuMuon = PhieuMuon->Next
+            ){
+            if (PhieuMuon->TrangThai != 0) {
+                continue;
+            }
+            int SoNgayTre = TinhSoNgayTre(PhieuMuon->NgayMuon, NgayKiemTra);
+            if (SoNgayTre <= 0) {
+                continue;
+            }
+            char ISBNCanXuLy[15];
+            LayISBNTuMaSach(PhieuMuon->MaSach, ISBNCanXuLy, 15);
+            const DauSach* DuLieuSach = TimDauSachTheoISBN(DanhSachDauSach, ISBNCanXuLy);
+            ChenThongKeQuaHanTheoThuTu(DanhSachQuaHan, SoLuongKetQua, SoPhanTuToiDa, DuLieuDocGia, PhieuMuon, DuLieuSach, SoNgayTre);
         }
-        char ISBNCanXuLy[15];
-        LayISBNTuMaSach(PhieuMuon->MaSach, ISBNCanXuLy, 15);
-        const DauSach* DuLieuSach = TimDauSachTheoISBN(DanhSachDauSach, ISBNCanXuLy);
-        ChenThongKeQuaHanTheoThuTu(DanhSachQuaHan, SoLuongKetQua, SoPhanTuToiDa, DuLieuDocGia, PhieuMuon, DuLieuSach, SoNgayTre);
+        ConTroHienTai = ConTroHienTai->Right;
     }
-    DuyetCayThongKeQuaHan(Root->Right, DanhSachDauSach, NgayKiemTra, DanhSachQuaHan, SoLuongKetQua, SoPhanTuToiDa);
 }
 // Lập danh sách quá hạn theo số ngày trễ giảm dần bằng thuật toán chèn có thứ tự
 inline void LapDanhSachQuaHan(

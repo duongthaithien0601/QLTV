@@ -1225,8 +1225,17 @@ namespace giaodien {
             KeNhap = ChuanHoaKe(KeNhap);
             break;
         }
-        bool ThemThanhCong = ThemDauSachMoi(DanhSachDauSach, ISBNCanXuLy, TenNhap, SoTrangNhap, TacGiaNhap, NamXuatBanNhap, TheLoaiNhap,
-            KeNhap, SoLuongCanXuLy);
+        bool ThemThanhCong = ThemDauSachMoi(
+            DanhSachDauSach,
+            ISBNCanXuLy,
+            TenNhap,
+            SoTrangNhap,
+            TacGiaNhap,
+            NamXuatBanNhap,
+            TheLoaiNhap,
+            KeNhap,
+            SoLuongCanXuLy
+        );
         tui::DiChuyenConTro(X0, FooterY - 2);
         if (ThemThanhCong) {
             tui::DatMau(tui::MauThanhCong);
@@ -2636,7 +2645,6 @@ namespace giaodien {
             for (int i = ChiSoDauTrang; i < ChiSoCuoiTrang; i++) {
                 const ThongKeQuaHan& KetQuaNhap = DanhSachDong[i];
                 std::string HoTenDocGia = std::string(KetQuaNhap.DuLieuDocGia->Ho) + " " + KetQuaNhap.DuLieuDocGia->Ten;
-                // Lấy tên sách trực tiếp qua địa chỉ đầu sách
                 std::string TenSachThongKe = "";
                 if (KetQuaNhap.DuLieuSach != NULL) {
                     TenSachThongKe = KetQuaNhap.DuLieuSach->TenSach;

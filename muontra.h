@@ -3,7 +3,6 @@
 #include "cautruc.h"
 #include "dausach.h"
 #include "docgia.h"
-
 // ======================= DỮ LIỆU KẾT QUẢ =======================
 struct ThongTinSachDangMuon {
     MuonTraNode* PhieuMuon;
@@ -41,7 +40,8 @@ inline void ThemPhieuMuonTraChoDocGia(
 // Lấy địa chỉ các phiếu đang mượn của một độc giả 
 inline void LayDanhSachPhieuDangMuon(const DocGia& DocGiaCanXuLy, MuonTraNode* DanhSachKetQua[], int& SoLuongKetQua){
     SoLuongKetQua = 0;
-    for (MuonTraNode* ConTroHienTai = DocGiaCanXuLy.MuonTraHead;
+    for (
+         MuonTraNode* ConTroHienTai = DocGiaCanXuLy.MuonTraHead;
          ConTroHienTai != NULL && SoLuongKetQua < 3;
          ConTroHienTai = ConTroHienTai->Next
         ){
@@ -80,7 +80,7 @@ inline bool KiemTraDocGiaQuaHanDenNgay(const DocGia& DocGiaCanXuLy, const NgayTh
         const MuonTraNode* ConTroHienTai = DocGiaCanXuLy.MuonTraHead;
         ConTroHienTai != NULL;
         ConTroHienTai = ConTroHienTai->Next
-        ) {
+        ){
         if (ConTroHienTai->TrangThai == 0) {
             int SoNgayTre = TinhSoNgayTre(ConTroHienTai->NgayMuon, NgayKiemTra);
             if (SoNgayTre > 0) {

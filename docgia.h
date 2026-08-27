@@ -10,16 +10,16 @@ inline DocGiaNode* TimDocGiaTheoMaThe(DocGiaNode* Root, int MaTheCanXuLy){
     DocGiaNode* ConTroHienTai = Root;
     while (ConTroHienTai != NULL){
         if (MaTheCanXuLy < ConTroHienTai->ThongTin.MaThe){
-            ConTroHienTai = ConTroHienTai->Left; // Nhỏ hơn -> Sang trái
+            ConTroHienTai = ConTroHienTai->Left; 
         }
         else if (MaTheCanXuLy > ConTroHienTai->ThongTin.MaThe){
-            ConTroHienTai = ConTroHienTai->Right; // Lớn hơn -> Sang phải
+            ConTroHienTai = ConTroHienTai->Right; 
         }
         else{
-            return ConTroHienTai; // Tìm thấy
+            return ConTroHienTai; 
         }
     }
-    return NULL; // Không tìm thấy
+    return NULL; 
 }
 // Kiểm tra mã thẻ đã tồn tại trên cây độc giả hay chưa
 inline bool KiemTraMaTheTonTai(DocGiaNode* Root, int MaTheCanXuLy) {
@@ -112,8 +112,7 @@ inline void XoaNodeDocGia(DocGiaNode*& Root, int MaTheCanXuLy) {
 // Đếm số sách độc giả hiện đang mượn
 inline int DemSoSachDocGiaDangMuon(const DocGia& DocGiaCanXuLy) {
     int SoLuongDem = 0;
-    for (MuonTraNode* ConTroHienTai = DocGiaCanXuLy.MuonTraHead; ConTroHienTai != NULL;
-        ConTroHienTai = ConTroHienTai->Next) {
+    for (MuonTraNode* ConTroHienTai = DocGiaCanXuLy.MuonTraHead; ConTroHienTai != NULL; ConTroHienTai = ConTroHienTai->Next) {
         if (ConTroHienTai->TrangThai == 0) {
             SoLuongDem++;
         }
@@ -125,7 +124,7 @@ inline bool XoaDocGiaNeuKhongMuonSach(DocGiaNode*& Root, int MaTheCanXuLy) {
     DocGiaNode* ConTroHienTai = TimDocGiaTheoMaThe(Root, MaTheCanXuLy);
     if (ConTroHienTai == NULL) {
         return false;
-    } // Không tồn tại
+    } 
     if (DemSoSachDocGiaDangMuon(ConTroHienTai->ThongTin) > 0) {
         return false;
     }
