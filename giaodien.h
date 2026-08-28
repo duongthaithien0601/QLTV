@@ -1225,10 +1225,7 @@ namespace giaodien {
             KeNhap = ChuanHoaKe(KeNhap);
             break;
         }
-        bool ThemThanhCong = ThemDauSachMoi(
-            DanhSachDauSach,
-            ISBNCanXuLy,
-            TenNhap,
+        bool ThemThanhCong = ThemDauSachMoi(DanhSachDauSach, ISBNCanXuLy, TenNhap,
             SoTrangNhap,
             TacGiaNhap,
             NamXuatBanNhap,
@@ -1713,7 +1710,6 @@ namespace giaodien {
         for (int i = 0; i < SoPhanTu; i++) {
             ThongTinDauSachTheoTheLoai& DongDaXuLy = DanhSachDaXuLy[i];
             DauSach* DuLieuSach = DongDaXuLy.DuLieuSach;
-
             if (DongDaXuLy.LaDauNhom == 1) {
                 if (TongSoDong > 0 && TongSoDong < MAXLINES) {
                     CacDongKetQua[TongSoDong++] = "";
@@ -1739,46 +1735,31 @@ namespace giaodien {
             }
             std::string DongBanSao = "      Ma ban sao: ";
             bool LaBanSaoDauTien = true;
-
             DanhMucSachNode* ConTroHienTai = DuLieuSach->DanhMucSachHead;
-
             while (ConTroHienTai != NULL) {
                 std::string TrangThai;
-
                 if (ConTroHienTai->TrangThai == 0) {
                     TrangThai = "CHO MUON";
                 }
                 else if (ConTroHienTai->TrangThai == 1) {
                     TrangThai = "DA MUON";
                 }
-
-                std::string BanSao =
-                    std::string(ConTroHienTai->MaSach) +
-                    " (" + TrangThai + ")";
-
+                std::string BanSao = std::string(ConTroHienTai->MaSach) + " (" + TrangThai + ")";
                 if (!LaBanSaoDauTien) {
                     BanSao = ", " + BanSao;
                 }
-
-                // Nếu thêm vào sẽ quá dài thì tạo dòng mới
                 if (DongBanSao.length() + BanSao.length() > 105) {
                     if (TongSoDong < MAXLINES) {
                         CacDongKetQua[TongSoDong++] = DongBanSao;
                     }
-
-                    DongBanSao = "                  " +
-                        std::string(ConTroHienTai->MaSach) +
-                        " (" + TrangThai + ")";
+                    DongBanSao = "                  " + std::string(ConTroHienTai->MaSach) + " (" + TrangThai + ")";
                 }
                 else {
                     DongBanSao += BanSao;
                 }
-
                 LaBanSaoDauTien = false;
                 ConTroHienTai = ConTroHienTai->Next;
             }
-
-            // Thêm dòng cuối
             if (DongBanSao != "      Ma ban sao: ") {
                 if (TongSoDong < MAXLINES) {
                     CacDongKetQua[TongSoDong++] = DongBanSao;
@@ -2472,7 +2453,7 @@ namespace giaodien {
         const int DoRongCotNGAY = 10;
         const int DoRongCotSONG = 7;
         tui::XoaManHinh();
-        tui::VeKhung(2, 1, ChieuRong, ChieuCao, "MUON / TRA  >  DANH SACH DANG MUON CUA DOC GIA");
+        tui::VeKhung(2, 1, ChieuRong, ChieuCao, "MUON / TRA  >  DANH MUC SACH DANG MUON CUA DOC GIA");
         int Y = Y0 + 1;
         tui::DiChuyenConTro(X0, Y);
         std::cout << "Nhap ma the: ";
@@ -2576,7 +2557,7 @@ namespace giaodien {
             if (Y > YMax) {
                 tui::NhanPhimBatKyDeQuayLai(4, FooterY - 1);
                 tui::XoaManHinh();
-                tui::VeKhung(2, 1, ChieuRong, ChieuCao, "MUON / TRA  >  DANH SACH DANG MUON CUA DOC GIA");
+                tui::VeKhung(2, 1, ChieuRong, ChieuCao, "MUON / TRA  >  DANH MUC SACH DANG MUON CUA DOC GIA");
                 Y = 4;
                 tui::DiChuyenConTro(X0, Y++);
                 std::cout << "Ngay thong ke: " << ChuyenNgayThanhChuoi(NgayThongKe);
