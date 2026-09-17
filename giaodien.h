@@ -1225,10 +1225,7 @@ namespace giaodien {
             KeNhap = ChuanHoaKe(KeNhap);
             break;
         }
-        bool ThemThanhCong = ThemDauSachMoi(DanhSachDauSach, ISBNCanXuLy, TenNhap,
-            SoTrangNhap,
-            TacGiaNhap,
-            NamXuatBanNhap,
+        bool ThemThanhCong = ThemDauSachMoi(DanhSachDauSach, ISBNCanXuLy, TenNhap, SoTrangNhap, TacGiaNhap, NamXuatBanNhap,
             TheLoaiNhap,
             KeNhap,
             SoLuongCanXuLy
@@ -1732,38 +1729,6 @@ namespace giaodien {
                 LayKeDauSach(DuLieuSach);
             if (TongSoDong < MAXLINES) {
                 CacDongKetQua[TongSoDong++] = DongDuLieu;
-            }
-            std::string DongBanSao = "      Ma ban sao: ";
-            bool LaBanSaoDauTien = true;
-            DanhMucSachNode* ConTroHienTai = DuLieuSach->DanhMucSachHead;
-            while (ConTroHienTai != NULL) {
-                std::string TrangThai;
-                if (ConTroHienTai->TrangThai == 0) {
-                    TrangThai = "CHO MUON";
-                }
-                else if (ConTroHienTai->TrangThai == 1) {
-                    TrangThai = "DA MUON";
-                }
-                std::string BanSao = std::string(ConTroHienTai->MaSach) + " (" + TrangThai + ")";
-                if (!LaBanSaoDauTien) {
-                    BanSao = ", " + BanSao;
-                }
-                if (DongBanSao.length() + BanSao.length() > 105) {
-                    if (TongSoDong < MAXLINES) {
-                        CacDongKetQua[TongSoDong++] = DongBanSao;
-                    }
-                    DongBanSao = "                  " + std::string(ConTroHienTai->MaSach) + " (" + TrangThai + ")";
-                }
-                else {
-                    DongBanSao += BanSao;
-                }
-                LaBanSaoDauTien = false;
-                ConTroHienTai = ConTroHienTai->Next;
-            }
-            if (DongBanSao != "      Ma ban sao: ") {
-                if (TongSoDong < MAXLINES) {
-                    CacDongKetQua[TongSoDong++] = DongBanSao;
-                }
             }
         }
         const int StartY = 5;
