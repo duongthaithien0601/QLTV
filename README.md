@@ -35,5 +35,5 @@ Trong bộ mã nguồn đã có sẵn các file cấu hình project cho Visual S
 ---
 **⚠️ Lưu ý nhỏ:** 
 
-1. Nếu bạn chạy các bản visual code mới hơn thì phần mềm sẽ yêu cầu bạn cập nhật một số cấu hình để chạy. Các bạn chỉ cần bấm đồng ý rồi chương trình sẽ chạy bình thường.
+1. Nếu bạn chạy các bản Visual Studio mới hơn thì phần mềm sẽ yêu cầu bạn cập nhật một số cấu hình để chạy. Các bạn chỉ cần bấm đồng ý rồi chương trình sẽ chạy bình thường.
 2. Chương trình sẽ tự động tạo một thư mục `data` để lưu trữ file text. Nếu bạn chạy lần đầu, chương trình báo *"Tai du lieu that bai"* thì đừng lo lắng nhé, hệ thống sẽ tự động khởi tạo cơ sở dữ liệu rỗng và tạo file lưu trữ cho những lần chạy sau. Chúc các bạn pass môn thành công! 🎉
